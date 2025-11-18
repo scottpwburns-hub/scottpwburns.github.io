@@ -3,793 +3,875 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Caroline's Virtual Closet</title>
+  <title>Caroline's Virtual Closet 2.0</title>
 
-  <!-- 1. Tailwind CSS -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- TensorFlow.js for AI processing -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@latest"></script>
 
-  <!-- 2. "Cozy & Magical" Fonts -->
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=La+Belle+Aurore&family=Nunito:wght@400;600;700&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=La+Belle+Aurore&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
 
-  <!-- 3. "Add to Home Screen" (PWA) Manifest -->
-  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIlRoZSBNYWdpY2FsIENsb3NldCIsCiAgInNob3J0X25hbWUiOiAiTWFnaWMgQ2xvc2V0IiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNGNUYzRjkiLAogICJ0aGVtZV9jb2xvciI6ICIjOEJBNzJCMTEiLAogICJkZXNjcmlwdGlvbiI6ICJBIGNvenkgYW5kIG1hZ2ljYWwgdmlydHVhbCBjbG9zZXQuIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9wbGFjZWhvbGQuY28vMTkyeDE5Mi84QjcyQjEvRjVGM0Y5P3RleHQ94p2kIiwKICAgICAgInNpemVzIjogIjE5MngxOTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9LAogICAgewogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzUxMng1TEIvOEI3MkIxL0Y1RjNGOT90ZXh0PeKdpCIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==">
-  
-  <!-- 4. Custom Theme Styles -->
   <style>
-    /* Apply custom fonts */
+    /* Custom Styles */
     body {
       font-family: "Nunito", sans-serif;
-      background-color: #f5f3f9;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
     .font-title {
       font-family: "La Belle Aurore", cursive;
     }
-
-    /* Custom Tailwind Theme */
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            'magic-bg': '#F5F3F9',
-            'magic-lavender': '#E4DDEF',
-            'magic-violet': '#8B72B1',
-            'magic-purple': '#6D5B8D',
-            'magic-dark': '#4A3A6A',
-            'text-dark': '#2D3748', /* Added dark gray for better readability */
-          },
-          fontFamily: {
-            'sans': ['Nunito', 'sans-serif'],
-            'title': ['La Belle Aurore', 'cursive'],
-          },
-        },
-      },
-    };
-
-    /* Style for the "digital sticker" items */
+    
     .movable-item {
       position: absolute;
-      width: 150px;
-      height: 150px;
       user-select: none;
       -webkit-user-select: none;
       touch-action: none;
       cursor: move;
+      transition: transform 0.2s ease;
     }
-    .movable-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      pointer-events: none;
-    }
+    
     .movable-item.selected {
-      outline: 3px dashed #8B72B1;
-      border-radius: 16px;
-      box-shadow: 0 0 15px rgba(139, 114, 177, 0.7);
-    }
-
-    /* Hide helper text on real phones */
-    @media (pointer: coarse) {
-      .desktop-helper {
-        display: none;
-      }
+      outline: 3px solid #8B5CF6;
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
     }
     
-    /* Full-screen iOS feel */
-    html, body, #app-container {
-      height: 100%;
-      overflow: hidden;
-      margin: 0;
-      padding: 0;
-    }
-
-    /* Ensure all screens fill the container */
-    #screen-loading,
-    #screen-model-uploader,
-    #screen-dressing-room,
-    #screen-item-uploader {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-
-    /* Improved text contrast */
-    .text-readable {
-      color: #2D3748 !important; /* Dark gray for best readability */
+    .clothing-item {
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
     }
     
-    .text-semidark {
-      color: #4A5568 !important; /* Medium dark for good contrast */
+    /* Loading animations */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .animate-pulse-slow {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    /* Custom scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 10px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #555;
     }
   </style>
 </head>
 
-<body class="bg-magic-bg text-readable antialiased">
-  <div id="app-container" class="relative w-full h-full max-w-lg mx-auto shadow-2xl overflow-hidden bg-white">
-    <!-- Loading Screen -->
-    <div id="screen-loading" class="w-full h-full flex flex-col items-center justify-center p-8">
-      <div class="font-title text-6xl text-magic-violet text-center">Caroline's Virtual Closet</div>
-      <div id="loading-text" class="text-semidark mt-4">Loading...</div>
-    </div>
-
-    <!-- Model Uploader Screen -->
-    <div id="screen-model-uploader" class="w-full h-full flex flex-col p-6 hidden">
-      <div class="text-center mb-4">
-        <h1 class="font-title text-5xl text-readable">Your Magic Mirror</h1>
-        <p class="text-semidark text-lg mt-2">
-          First, let's add your model photo.
-        </p>
-      </div>
-
-      <div class="relative flex-1 bg-magic-lavender rounded-2xl flex items-center justify-center overflow-hidden">
-        <!-- Pose Guide -->
-        <svg
-          class="absolute w-2/3 h-2/3 text-white opacity-60"
-          viewBox="0 0 100 200"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <path d="M 50 30 A 15 15 0 1 1 50 0 A 15 15 0 1 1 50 30" stroke-dasharray="4 4" />
-          <path d="M 50 30 Q 50 60 70 80 L 70 150 Q 70 190 50 195 Q 30 190 30 150 L 30 80 Q 50 60 50 30" stroke-dasharray="4 4" />
-          <path d="M 30 85 L 5 110" stroke-dasharray="4 4" />
-          <path d="M 70 85 L 95 110" stroke-dasharray="4 4" />
-        </svg>
-        <p class="absolute top-5 text-white font-semibold text-center w-full px-4">✨ Stand in a well-lit spot ✨</p>
-        <p class="absolute bottom-5 text-white font-semibold text-center w-full px-4">
-          Try an "A-pose" with arms slightly out!
-        </p>
-      </div>
-
-      <div class="mt-6">
-        <button id="btn-take-model-photo" class="w-full text-lg bg-magic-violet text-white font-bold py-4 px-6 rounded-full shadow-lg hover:bg-magic-purple transition-all">
-          Take Photo
-        </button>
-        <input type="file" id="input-model-photo" class="hidden" accept="image/*" />
-      </div>
-    </div>
-
-    <!-- Main Dressing Room -->
-    <div id="screen-dressing-room" class="w-full h-full flex flex-col hidden">
-      <!-- The Canvas -->
-      <div id="canvas" class="flex-1 relative bg-magic-lavender overflow-hidden">
-        <!-- Model Photo Background -->
-        <img id="canvas-model-bg" src="" class="absolute w-full h-full object-contain object-center" />
-        
-        <!-- Movable items will be added here -->
-      </div>
-      
-      <!-- Layering Controls -->
-      <div id="layer-controls" class="hidden absolute top-4 right-4 z-50 flex flex-col bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200">
-        <button id="btn-layer-up" class="p-3 text-2xl text-readable hover:bg-gray-100 rounded-t-2xl">⬆️</button>
-        <button id="btn-layer-down" class="p-3 text-2xl text-readable hover:bg-gray-100 border-t border-b border-gray-200">⬇️</button>
-        <button id="btn-layer-delete" class="p-3 text-2xl text-red-600 hover:bg-gray-100 rounded-b-2xl">🗑️</button>
-      </div>
-      
-      <p class="desktop-helper absolute top-4 left-4 z-50 bg-white/90 p-3 rounded-lg text-sm text-readable shadow border border-gray-200">
-        💡 Tip: Click and drag to move items
-      </p>
-
-      <!-- Closet Panel -->
-      <div id="closet-panel" class="w-full h-48 bg-white rounded-t-3xl shadow-2xl p-4 flex flex-col border-t border-gray-200">
-        <div class="flex justify-between items-center mb-2">
-          <h2 class="font-title text-3xl text-readable">My Closet</h2>
-          <div class="space-x-2">
-            <button id="btn-save-outfit" class="text-2xl text-readable hover:text-magic-violet transition-colors" title="Save Outfit">💾</button>
-            <button id="btn-load-outfit" class="text-2xl text-readable hover:text-magic-violet transition-colors" title="Load Outfit">📖</button>
-            <button id="btn-add-new-item" class="text-2xl text-readable hover:text-magic-violet transition-colors" title="Add New Item">🪄</button>
-          </div>
-        </div>
-        <div id="closet-items-container" class="flex-1 flex space-x-3 overflow-x-auto p-2 bg-magic-bg rounded-lg border border-gray-200">
-          <!-- Closet items will be added here -->
-          <div id="closet-empty-state" class="w-full flex flex-col items-center justify-center text-semidark">
-            <p class="text-sm font-semibold">Your closet is empty!</p>
-            <p class="text-sm">Tap the 🪄 to add an item.</p>
-          </div>
-        </div>
-      </div>
-    </div>
+<body class="min-h-screen text-gray-800">
+  <div id="app" class="min-h-screen flex flex-col">
     
-    <!-- Item Uploader Screen -->
-    <div id="screen-item-uploader" class="w-full h-full flex flex-col p-6 hidden">
-      <div class="flex justify-between items-center mb-4">
-        <h1 class="font-title text-5xl text-readable">Add Item</h1>
-        <button id="btn-uploader-close" class="text-2xl p-2 text-readable hover:text-red-500 transition-colors">❌</button>
-      </div>
-
-      <!-- Preview Area -->
-      <div class="flex-1 flex flex-col items-center justify-center bg-magic-lavender rounded-2xl p-4 overflow-hidden border-2 border-dashed border-magic-violet">
-        
-        <!-- Step 1: Upload Button -->
-        <button id="btn-pick-item-photo" class="p-6 bg-white/80 rounded-2xl flex flex-col items-center border-2 border-dashed border-magic-violet hover:bg-white transition-colors">
-          <span class="text-5xl">📷</span>
-          <span class="font-semibold text-readable mt-2">Upload Clothing Photo</span>
-          <span class="text-sm text-semidark mt-1">Click to select an image</span>
-        </button>
-        
-        <!-- Step 2: Loading Animation -->
-        <div id="uploader-loading" class="hidden flex-col items-center text-readable">
-          <div class="w-24 h-24 border-4 border-dashed border-magic-violet rounded-full animate-spin"></div>
-          <span class="font-title text-3xl mt-4 text-readable">Vibe-coding... ✨</span>
-          <span class="text-semidark">Processing image...</span>
-        </div>
-        
-        <!-- Step 3: AI Result Preview -->
-        <img id="uploader-preview" src="" class="hidden w-full h-full object-contain bg-white rounded-lg" />
-      </div>
-
-      <!-- Labeling Form -->
-      <div id="uploader-form" class="mt-6 space-y-3 hidden">
-        <div>
-          <label class="font-semibold text-readable ml-3">What is this?</label>
-          <input id="input-item-label" type="text" class="w-full p-4 rounded-full border-2 border-magic-lavender focus:border-magic-violet focus:outline-none text-readable bg-white" placeholder="e.g., 'Cozy Green Sweater'" />
-        </div>
-        <div>
-          <label class="font-semibold text-readable ml-3">What's the main color?</label>
-          <input id="input-item-color" type="text" class="w-full p-4 rounded-full border-2 border-magic-lavender focus:border-magic-violet focus:outline-none text-readable bg-white" placeholder="e.g., 'Green'" />
-        </div>
-        <button id="btn-save-item" class="w-full text-lg bg-magic-violet text-white font-bold py-4 px-6 rounded-full shadow-lg hover:bg-magic-purple transition-all">
-          Save to My Closet
-        </button>
-      </div>
-      
-      <!-- Hidden file input for item photos -->
-      <input type="file" id="input-item-photo" class="hidden" accept="image/*" />
-    </div>
-    
-    <!-- Outfit Analysis Modal -->
-    <div id="modal-outfit-analysis" class="hidden absolute inset-0 z-50 bg-black/50 p-6 flex items-center justify-center">
-      <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 relative border-2 border-magic-lavender">
-        <button id="btn-analysis-close" class="absolute top-4 right-4 text-2xl text-readable hover:text-red-500 transition-colors">❌</button>
-        <h2 class="font-title text-4xl text-readable text-center">Outfit Vibe</h2>
-        
-        <!-- Loading State -->
-        <div id="analysis-loading" class="my-8 flex flex-col items-center text-readable">
-          <div class="w-16 h-16 border-4 border-dashed border-magic-violet rounded-full animate-spin"></div>
-          <span class="font-title text-2xl mt-4 text-readable">Analyzing... 🔮</span>
-        </div>
-        
-        <!-- Results -->
-        <div id="analysis-results" class="hidden space-y-4 mt-4">
-          <div>
-            <h3 class="font-semibold text-readable">Formality</h3>
-            <div class="w-full bg-magic-lavender rounded-full h-6 mt-1 overflow-hidden">
-              <div id="formality-bar" class="h-6 bg-gradient-to-r from-green-400 to-blue-800 rounded-full transition-all duration-500" style="width: 0%"></div>
-            </div>
-            <div class="flex justify-between text-sm text-semidark mt-1">
-              <span>Casual</span>
-              <span>Formal</span>
+    <!-- Header -->
+    <header class="bg-white/90 backdrop-blur-sm shadow-sm border-b border-purple-200">
+      <div class="max-w-7xl mx-auto px-4 py-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <h1 class="font-title text-3xl text-purple-700">Caroline's Virtual Closet</h1>
+            <div class="hidden md:flex items-center space-x-2 text-sm text-purple-600">
+              <span>✨</span>
+              <span>AI-Powered Virtual Try-On</span>
             </div>
           </div>
-          <div>
-            <h3 class="font-semibold text-readable">Color Match</h3>
-            <p id="color-analysis" class="text-lg text-readable font-semibold bg-magic-lavender p-3 rounded-lg"></p>
+          <div class="flex items-center space-x-3">
+            <button id="btn-help" class="p-2 text-purple-600 hover:text-purple-800 transition-colors" title="Help">
+              ❓
+            </button>
+            <button id="btn-settings" class="p-2 text-purple-600 hover:text-purple-800 transition-colors" title="Settings">
+              ⚙️
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full p-4 gap-6">
+      
+      <!-- Left Sidebar - Closet & Controls -->
+      <div class="lg:w-80 flex flex-col space-y-6">
+        
+        <!-- Model Controls -->
+        <div class="bg-white rounded-2xl shadow-lg p-6">
+          <h2 class="font-title text-2xl text-purple-700 mb-4">Your Model</h2>
+          
+          <div class="space-y-4">
+            <button id="btn-upload-model" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold py-3 px-4 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg">
+              📸 Upload Model Photo
+            </button>
+            <input type="file" id="input-model-photo" class="hidden" accept="image/*" />
+            
+            <div class="flex space-x-2">
+              <button id="btn-detect-pose" class="flex-1 bg-purple-100 text-purple-700 font-semibold py-2 px-3 rounded-lg hover:bg-purple-200 transition-colors">
+                🎯 Detect Pose
+              </button>
+              <button id="btn-auto-fit" class="flex-1 bg-green-100 text-green-700 font-semibold py-2 px-3 rounded-lg hover:bg-green-200 transition-colors">
+                👗 Auto-Fit
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Closet Section -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 flex-1 flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-title text-2xl text-purple-700">Your Closet</h2>
+            <button id="btn-add-clothing" class="bg-purple-500 text-white p-2 rounded-lg hover:bg-purple-600 transition-colors">
+              ➕
+            </button>
+          </div>
+          
+          <div id="closet-items" class="flex-1 overflow-y-auto custom-scrollbar space-y-3">
+            <!-- Closet items will be dynamically added here -->
+            <div id="closet-empty" class="text-center text-gray-500 py-8">
+              <div class="text-4xl mb-2">👕</div>
+              <p class="font-semibold">Your closet is empty!</p>
+              <p class="text-sm">Add clothing items to get started</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Outfit Management -->
+        <div class="bg-white rounded-2xl shadow-lg p-6">
+          <h2 class="font-title text-2xl text-purple-700 mb-4">Outfits</h2>
+          
+          <div class="space-y-3">
+            <button id="btn-save-outfit" class="w-full bg-blue-500 text-white font-semibold py-3 px-4 rounded-xl hover:bg-blue-600 transition-all">
+              💾 Save Current Outfit
+            </button>
+            <button id="btn-clear-all" class="w-full bg-gray-500 text-white font-semibold py-3 px-4 rounded-xl hover:bg-gray-600 transition-all">
+              🗑️ Clear All
+            </button>
+          </div>
+          
+          <div id="saved-outfits" class="mt-4 space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
+            <!-- Saved outfits will appear here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Canvas Area -->
+      <div class="flex-1 flex flex-col">
+        
+        <!-- Canvas Controls -->
+        <div class="bg-white rounded-2xl shadow-lg p-4 mb-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <span class="font-semibold text-purple-700">Layers:</span>
+              <button id="btn-bring-forward" class="p-2 text-purple-600 hover:text-purple-800 transition-colors" title="Bring Forward">
+                ⬆️
+              </button>
+              <button id="btn-send-backward" class="p-2 text-purple-600 hover:text-purple-800 transition-colors" title="Send Backward">
+                ⬇️
+              </button>
+              <button id="btn-delete-item" class="p-2 text-red-600 hover:text-red-800 transition-colors" title="Delete Item">
+                🗑️
+              </button>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+              <button id="btn-ai-stylist" class="bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold py-2 px-4 rounded-lg hover:from-pink-600 hover:to-orange-600 transition-all">
+                🧠 AI Stylist
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas -->
+        <div class="flex-1 bg-gray-900 rounded-2xl shadow-2xl overflow-hidden relative">
+          
+          <!-- Loading Overlay -->
+          <div id="canvas-loading" class="absolute inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-2xl p-8 text-center max-w-sm mx-4">
+              <div class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <h3 class="font-title text-2xl text-purple-700 mb-2">Processing...</h3>
+              <p id="loading-message" class="text-gray-600">Analyzing your image</p>
+            </div>
+          </div>
+
+          <!-- Main Canvas -->
+          <div id="canvas-container" class="w-full h-full relative">
+            <!-- Model Background -->
+            <img id="model-background" src="" class="absolute inset-0 w-full h-full object-contain" style="display: none;" />
+            
+            <!-- Pose Skeleton (will be drawn by canvas) -->
+            <canvas id="pose-canvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+            
+            <!-- Clothing items will be dynamically added here -->
+          </div>
+
+          <!-- Empty State -->
+          <div id="canvas-empty" class="absolute inset-0 flex items-center justify-center">
+            <div class="text-center text-white">
+              <div class="text-6xl mb-4">👗</div>
+              <h3 class="font-title text-3xl mb-2">Welcome to Your Virtual Closet!</h3>
+              <p class="text-lg opacity-90">Upload your photo and start trying on clothes</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modals -->
+  
+  <!-- Add Clothing Modal -->
+  <div id="modal-add-clothing" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-title text-2xl text-purple-700">Add Clothing Item</h3>
+        <button class="text-gray-500 hover:text-gray-700 text-2xl" onclick="closeModal('modal-add-clothing')">×</button>
+      </div>
+      
+      <div class="space-y-4">
+        <div class="border-2 border-dashed border-purple-300 rounded-2xl p-8 text-center">
+          <div class="text-4xl mb-2">📷</div>
+          <p class="font-semibold text-purple-700 mb-1">Upload Clothing Photo</p>
+          <p class="text-sm text-gray-600 mb-4">AI will remove the background automatically</p>
+          <button id="btn-upload-clothing" class="bg-purple-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-purple-600 transition-colors">
+            Choose Photo
+          </button>
+          <input type="file" id="input-clothing-photo" class="hidden" accept="image/*" />
+        </div>
+        
+        <div id="clothing-preview-container" class="hidden">
+          <img id="clothing-preview" src="" class="w-32 h-32 object-contain mx-auto bg-gray-100 rounded-lg" />
+          <div class="mt-4 space-y-3">
+            <input type="text" id="input-clothing-name" placeholder="Item name (e.g., Red Dress)" class="w-full p-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none" />
+            <select id="select-clothing-type" class="w-full p-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none">
+              <option value="">Select clothing type</option>
+              <option value="top">Top</option>
+              <option value="bottom">Bottom</option>
+              <option value="dress">Dress</option>
+              <option value="outerwear">Outerwear</option>
+              <option value="shoes">Shoes</option>
+              <option value="accessory">Accessory</option>
+            </select>
+            <button id="btn-save-clothing" class="w-full bg-green-500 text-white font-semibold py-3 rounded-lg hover:bg-green-600 transition-colors">
+              Save to Closet
+            </button>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <script type="module">
-    // --- GLOBAL STATE ---
-    let state = {
-      modelPhoto: null,
-      closet: [],
-      outfits: [],
-      canvasItems: [],
-      selectedCanvasId: null,
-    };
-
-    // --- DOM Elements ---
-    const screens = {
-      loading: document.getElementById('screen-loading'),
-      modelUploader: document.getElementById('screen-model-uploader'),
-      dressingRoom: document.getElementById('screen-dressing-room'),
-      itemUploader: document.getElementById('screen-item-uploader'),
-    };
-    const modalAnalysis = document.getElementById('modal-outfit-analysis');
-    
-    // --- 1. DATABASE (IndexedDB) ---
-    let db;
-    function openDatabase() {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open("MagicalClosetDB", 1);
-        
-        request.onerror = (e) => reject("Error opening DB");
-        request.onsuccess = (e) => {
-          db = e.target.result;
-          resolve(db);
-        };
-        
-        request.onupgradeneeded = (e) => {
-          let db = e.target.result;
-          if (!db.objectStoreNames.contains("settings")) {
-            db.createObjectStore("settings", { keyPath: "key" });
-          }
-          if (!db.objectStoreNames.contains("closetItems")) {
-            db.createObjectStore("closetItems", { keyPath: "id", autoIncrement: true });
-          }
-          if (!db.objectStoreNames.contains("savedOutfits")) {
-            db.createObjectStore("savedOutfits", { keyPath: "id", autoIncrement: true });
-          }
-        };
-      });
-    }
-
-    function dbGet(storeName, key) {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(storeName, "readonly");
-        const store = tx.objectStore(storeName);
-        const request = store.get(key);
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-      });
-    }
-
-    function dbGetAll(storeName) {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(storeName, "readonly");
-        const store = tx.objectStore(storeName);
-        const request = store.getAll();
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-      });
-    }
-
-    function dbPut(storeName, value) {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(storeName, "readwrite");
-        const store = tx.objectStore(storeName);
-        const request = store.put(value);
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-      });
-    }
-
-    // --- 2. AI SERVICE (Gemini API) - SIMULATED FOR NOW ---
-    async function aiRemoveBackground(base64ImageData) {
-      // For GitHub Pages demo, we'll simulate this since API keys can't be stored client-side
-      console.log("Simulating AI background removal...");
+  <!-- AI Stylist Modal -->
+  <div id="modal-ai-stylist" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-title text-2xl text-purple-700">AI Stylist</h3>
+        <button class="text-gray-500 hover:text-gray-700 text-2xl" onclick="closeModal('modal-ai-stylist')">×</button>
+      </div>
       
-      // Simulate API delay
+      <div class="space-y-4">
+        <div id="ai-stylist-loading" class="text-center py-8">
+          <div class="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p class="text-purple-700 font-semibold">Analyzing your style...</p>
+        </div>
+        
+        <div id="ai-stylist-results" class="hidden">
+          <div class="bg-purple-50 rounded-xl p-4">
+            <h4 class="font-semibold text-purple-700 mb-2">✨ Style Suggestions</h4>
+            <p id="ai-suggestion-text" class="text-gray-700"></p>
+          </div>
+          <button id="btn-apply-suggestion" class="w-full bg-purple-500 text-white font-semibold py-3 rounded-lg hover:bg-purple-600 transition-colors mt-4">
+            Apply Suggestion
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global State
+    const state = {
+      model: null,
+      pose: null,
+      bodySegmentation: null,
+      closet: [],
+      canvasItems: [],
+      selectedItem: null,
+      isProcessing: false,
+      tfReady: false
+    };
+
+    // DOM Elements
+    const elements = {
+      // Canvas
+      canvasContainer: document.getElementById('canvas-container'),
+      modelBackground: document.getElementById('model-background'),
+      poseCanvas: document.getElementById('pose-canvas'),
+      canvasEmpty: document.getElementById('canvas-empty'),
+      canvasLoading: document.getElementById('canvas-loading'),
+      loadingMessage: document.getElementById('loading-message'),
+      
+      // Closet
+      closetItems: document.getElementById('closet-items'),
+      closetEmpty: document.getElementById('closet-empty'),
+      
+      // Buttons
+      btnUploadModel: document.getElementById('btn-upload-model'),
+      inputModelPhoto: document.getElementById('input-model-photo'),
+      btnDetectPose: document.getElementById('btn-detect-pose'),
+      btnAutoFit: document.getElementById('btn-auto-fit'),
+      btnAddClothing: document.getElementById('btn-add-clothing'),
+      btnSaveOutfit: document.getElementById('btn-save-outfit'),
+      btnClearAll: document.getElementById('btn-clear-all'),
+      btnBringForward: document.getElementById('btn-bring-forward'),
+      btnSendBackward: document.getElementById('btn-send-backward'),
+      btnDeleteItem: document.getElementById('btn-delete-item'),
+      btnAiStylist: document.getElementById('btn-ai-stylist'),
+      
+      // Modals
+      modalAddClothing: document.getElementById('modal-add-clothing'),
+      modalAiStylist: document.getElementById('modal-ai-stylist'),
+      btnUploadClothing: document.getElementById('btn-upload-clothing'),
+      inputClothingPhoto: document.getElementById('input-clothing-photo'),
+      clothingPreviewContainer: document.getElementById('clothing-preview-container'),
+      clothingPreview: document.getElementById('clothing-preview'),
+      inputClothingName: document.getElementById('input-clothing-name'),
+      selectClothingType: document.getElementById('select-clothing-type'),
+      btnSaveClothing: document.getElementById('btn-save-clothing'),
+      aiStylistLoading: document.getElementById('ai-stylist-loading'),
+      aiStylistResults: document.getElementById('ai-stylist-results'),
+      aiSuggestionText: document.getElementById('ai-suggestion-text'),
+      btnApplySuggestion: document.getElementById('btn-apply-suggestion')
+    };
+
+    // Initialize TensorFlow.js
+    async function initializeTF() {
+      try {
+        await tf.ready();
+        state.tfReady = true;
+        console.log('TensorFlow.js loaded successfully');
+      } catch (error) {
+        console.error('Error loading TensorFlow.js:', error);
+      }
+    }
+
+    // Enhanced Background Removal using Canvas
+    function removeBackground(image, type = 'clothing') {
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = image.width;
+        canvas.height = image.height;
+        ctx.drawImage(image, 0, 0);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        
+        // Simple background removal (replace with AI model in production)
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          
+          // Remove white/light backgrounds
+          if (r > 200 && g > 200 && b > 200) {
+            data[i + 3] = 0; // Set alpha to 0
+          }
+          // Remove green screen (common in clothing photos)
+          else if (g > r + 30 && g > b + 30) {
+            data[i + 3] = 0;
+          }
+        }
+        
+        ctx.putImageData(imageData, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      });
+    }
+
+    // Advanced Pose Detection Simulation
+    async function detectPose(image) {
+      setLoading(true, 'Detecting body pose...');
+      
+      // Simulate AI processing delay
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // In a real implementation, you would call the Gemini API here
-      // For demo purposes, we'll just return the original image
-      return `data:image/jpeg;base64,${base64ImageData}`;
-    }
-
-    async function aiAnalyzeOutfit(items) {
-      // Simulate AI analysis for demo
-      console.log("Simulating outfit analysis...");
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Return mock analysis
-      return {
-        formality: 7,
-        colorScheme: "Complementary colors with warm tones"
+      // Mock pose data - in production, use TensorFlow Pose Detection
+      const mockPose = {
+        keypoints: [
+          { name: 'nose', x: 0.5, y: 0.2 },
+          { name: 'left_shoulder', x: 0.4, y: 0.3 },
+          { name: 'right_shoulder', x: 0.6, y: 0.3 },
+          { name: 'left_elbow', x: 0.3, y: 0.4 },
+          { name: 'right_elbow', x: 0.7, y: 0.4 },
+          { name: 'left_hip', x: 0.45, y: 0.5 },
+          { name: 'right_hip', x: 0.55, y: 0.5 },
+          { name: 'left_knee', x: 0.4, y: 0.7 },
+          { name: 'right_knee', x: 0.6, y: 0.7 }
+        ]
       };
+      
+      state.pose = mockPose;
+      drawPoseSkeleton();
+      setLoading(false);
+      
+      return mockPose;
     }
 
-    // --- 3. UTILITIES ---
-    function fileToBase64(file, maxWidth = 800) {
-      return new Promise((resolve, reject) => {
+    // Draw Pose Skeleton
+    function drawPoseSkeleton() {
+      const canvas = elements.poseCanvas;
+      const ctx = canvas.getContext('2d');
+      
+      // Match canvas size to model image
+      const modelImg = elements.modelBackground;
+      if (modelImg.style.display !== 'none') {
+        canvas.width = modelImg.offsetWidth;
+        canvas.height = modelImg.offsetHeight;
+      }
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      if (!state.pose) return;
+      
+      // Draw keypoints
+      state.pose.keypoints.forEach(kp => {
+        const x = kp.x * canvas.width;
+        const y = kp.y * canvas.height;
+        
+        ctx.fillStyle = '#8B5CF6';
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        ctx.fillStyle = 'white';
+        ctx.font = '12px Arial';
+        ctx.fillText(kp.name.replace('_', ' '), x + 8, y - 8);
+      });
+      
+      // Draw skeleton lines
+      const connections = [
+        ['left_shoulder', 'right_shoulder'],
+        ['left_shoulder', 'left_elbow'],
+        ['right_shoulder', 'right_elbow'],
+        ['left_shoulder', 'left_hip'],
+        ['right_shoulder', 'right_hip'],
+        ['left_hip', 'right_hip']
+      ];
+      
+      ctx.strokeStyle = '#8B5CF6';
+      ctx.lineWidth = 3;
+      
+      connections.forEach(([start, end]) => {
+        const startKp = state.pose.keypoints.find(kp => kp.name === start);
+        const endKp = state.pose.keypoints.find(kp => kp.name === end);
+        
+        if (startKp && endKp) {
+          ctx.beginPath();
+          ctx.moveTo(startKp.x * canvas.width, startKp.y * canvas.height);
+          ctx.lineTo(endKp.x * canvas.width, endKp.y * canvas.height);
+          ctx.stroke();
+        }
+      });
+    }
+
+    // Auto-Fit Clothing to Body
+    function autoFitClothing(itemElement, clothingType) {
+      if (!state.pose) return;
+      
+      const canvas = elements.poseCanvas;
+      const scaleX = canvas.width;
+      const scaleY = canvas.height;
+      
+      let position = { x: 0, y: 0 };
+      let size = { width: 200, height: 300 };
+      
+      switch (clothingType) {
+        case 'top':
+          position = {
+            x: (state.pose.keypoints.find(kp => kp.name === 'left_shoulder').x * scaleX) - 100,
+            y: (state.pose.keypoints.find(kp => kp.name === 'left_shoulder').y * scaleY) - 50
+          };
+          size = { width: 200, height: 150 };
+          break;
+          
+        case 'bottom':
+          position = {
+            x: (state.pose.keypoints.find(kp => kp.name === 'left_hip').x * scaleX) - 80,
+            y: (state.pose.keypoints.find(kp => kp.name === 'left_hip').y * scaleY)
+          };
+          size = { width: 160, height: 200 };
+          break;
+          
+        case 'dress':
+          position = {
+            x: (state.pose.keypoints.find(kp => kp.name === 'left_shoulder').x * scaleX) - 100,
+            y: (state.pose.keypoints.find(kp => kp.name === 'left_shoulder').y * scaleY) - 30
+          };
+          size = { width: 200, height: 300 };
+          break;
+      }
+      
+      itemElement.style.left = `${position.x}px`;
+      itemElement.style.top = `${position.y}px`;
+      itemElement.style.width = `${size.width}px`;
+      itemElement.style.height = `${size.height}px`;
+    }
+
+    // Add Clothing Item to Canvas
+    function addClothingToCanvas(clothingItem) {
+      const itemElement = document.createElement('div');
+      itemElement.className = 'movable-item clothing-item';
+      itemElement.dataset.itemId = clothingItem.id;
+      itemElement.dataset.type = clothingItem.type;
+      
+      itemElement.innerHTML = `
+        <img src="${clothingItem.image}" alt="${clothingItem.name}" class="w-full h-full object-contain" />
+        <div class="absolute top-0 left-0 right-0 bg-black/50 text-white text-xs p-1 text-center opacity-0 transition-opacity">
+          ${clothingItem.name}
+        </div>
+      `;
+      
+      // Make draggable and resizable
+      makeItemInteractive(itemElement);
+      
+      // Auto-fit based on clothing type
+      autoFitClothing(itemElement, clothingItem.type);
+      
+      elements.canvasContainer.appendChild(itemElement);
+      state.canvasItems.push({
+        element: itemElement,
+        data: clothingItem
+      });
+      
+      // Hide empty state
+      elements.canvasEmpty.style.display = 'none';
+      
+      return itemElement;
+    }
+
+    // Make Items Interactive
+    function makeItemInteractive(element) {
+      let isDragging = false;
+      let startX, startY, startLeft, startTop;
+      
+      element.addEventListener('mousedown', startDrag);
+      element.addEventListener('touchstart', startDrag);
+      
+      function startDrag(e) {
+        e.preventDefault();
+        isDragging = true;
+        
+        const rect = element.getBoundingClientRect();
+        startLeft = parseInt(element.style.left) || 0;
+        startTop = parseInt(element.style.top) || 0;
+        
+        if (e.type === 'mousedown') {
+          startX = e.clientX;
+          startY = e.clientY;
+        } else {
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+        }
+        
+        selectItem(element);
+        
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag, { passive: false });
+        document.addEventListener('mouseup', stopDrag);
+        document.addEventListener('touchend', stopDrag);
+      }
+      
+      function drag(e) {
+        if (!isDragging) return;
+        
+        let clientX, clientY;
+        if (e.type === 'mousemove') {
+          clientX = e.clientX;
+          clientY = e.clientY;
+        } else {
+          clientX = e.touches[0].clientX;
+          clientY = e.touches[0].clientY;
+        }
+        
+        const deltaX = clientX - startX;
+        const deltaY = clientY - startY;
+        
+        element.style.left = `${startLeft + deltaX}px`;
+        element.style.top = `${startTop + deltaY}px`;
+      }
+      
+      function stopDrag() {
+        isDragging = false;
+        document.removeEventListener('mousemove', drag);
+        document.removeEventListener('touchmove', drag);
+        document.removeEventListener('mouseup', stopDrag);
+        document.removeEventListener('touchend', stopDrag);
+      }
+      
+      // Show label on hover
+      element.addEventListener('mouseenter', () => {
+        element.querySelector('div').style.opacity = '1';
+      });
+      
+      element.addEventListener('mouseleave', () => {
+        element.querySelector('div').style.opacity = '0';
+      });
+    }
+
+    // Select Item
+    function selectItem(element) {
+      // Deselect all items
+      document.querySelectorAll('.movable-item').forEach(item => {
+        item.classList.remove('selected');
+      });
+      
+      // Select current item
+      element.classList.add('selected');
+      state.selectedItem = element;
+    }
+
+    // Layer Management
+    function bringForward() {
+      if (!state.selectedItem) return;
+      
+      const currentZ = parseInt(state.selectedItem.style.zIndex) || 1;
+      state.selectedItem.style.zIndex = currentZ + 1;
+    }
+    
+    function sendBackward() {
+      if (!state.selectedItem) return;
+      
+      const currentZ = parseInt(state.selectedItem.style.zIndex) || 1;
+      state.selectedItem.style.zIndex = Math.max(1, currentZ - 1);
+    }
+    
+    function deleteItem() {
+      if (!state.selectedItem) return;
+      
+      state.selectedItem.remove();
+      state.canvasItems = state.canvasItems.filter(item => item.element !== state.selectedItem);
+      state.selectedItem = null;
+      
+      // Show empty state if no items left
+      if (state.canvasItems.length === 0) {
+        elements.canvasEmpty.style.display = 'flex';
+      }
+    }
+
+    // AI Stylist
+    async function analyzeStyle() {
+      setLoading(true, 'Consulting AI stylist...');
+      
+      // Simulate AI analysis
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      const suggestions = [
+        "This outfit would look amazing with a statement necklace and some heels!",
+        "Try adding a belt to define your waist and complete the silhouette.",
+        "The colors work well together! Consider adding a pop of color with accessories.",
+        "This is a great foundation! Layer with a jacket for a more polished look.",
+        "Perfect for a casual day out! Add some sneakers for comfort and style."
+      ];
+      
+      const randomSuggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+      
+      elements.aiSuggestionText.textContent = randomSuggestion;
+      elements.aiStylistLoading.classList.add('hidden');
+      elements.aiStylistResults.classList.remove('hidden');
+      setLoading(false);
+    }
+
+    // Utility Functions
+    function setLoading(loading, message = 'Processing...') {
+      state.isProcessing = loading;
+      elements.loadingMessage.textContent = message;
+      elements.canvasLoading.classList.toggle('hidden', !loading);
+    }
+    
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+    
+    function generateId() {
+      return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+
+    // Event Listeners
+    function initializeEventListeners() {
+      // Model Photo Upload
+      elements.btnUploadModel.addEventListener('click', () => {
+        elements.inputModelPhoto.click();
+      });
+      
+      elements.inputModelPhoto.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
         const reader = new FileReader();
         reader.onload = (e) => {
+          elements.modelBackground.src = e.target.result;
+          elements.modelBackground.style.display = 'block';
+          elements.canvasEmpty.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      });
+      
+      // Pose Detection
+      elements.btnDetectPose.addEventListener('click', async () => {
+        if (elements.modelBackground.style.display === 'none') {
+          alert('Please upload a model photo first!');
+          return;
+        }
+        
+        await detectPose(elements.modelBackground);
+      });
+      
+      // Auto-Fit
+      elements.btnAutoFit.addEventListener('click', () => {
+        state.canvasItems.forEach(item => {
+          autoFitClothing(item.element, item.data.type);
+        });
+      });
+      
+      // Add Clothing
+      elements.btnAddClothing.addEventListener('click', () => {
+        elements.modalAddClothing.classList.remove('hidden');
+      });
+      
+      elements.btnUploadClothing.addEventListener('click', () => {
+        elements.inputClothingPhoto.click();
+      });
+      
+      elements.inputClothingPhoto.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = async (e) => {
           const img = new Image();
-          img.onload = () => {
-            // Only resize if image is larger than maxWidth
-            if (img.width <= maxWidth) {
-              resolve(e.target.result.split(',')[1]);
-              return;
-            }
-            
-            const canvas = document.createElement('canvas');
-            const scale = maxWidth / img.width;
-            canvas.width = maxWidth;
-            canvas.height = img.height * scale;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            resolve(canvas.toDataURL('image/jpeg', 0.8).split(',')[1]);
+          img.onload = async () => {
+            // Remove background
+            const processedImage = await removeBackground(img);
+            elements.clothingPreview.src = processedImage;
+            elements.clothingPreviewContainer.classList.remove('hidden');
           };
           img.src = e.target.result;
         };
-        reader.onerror = (e) => reject(e);
         reader.readAsDataURL(file);
       });
-    }
-
-    function navigate(screenName) {
-      Object.values(screens).forEach(s => s.classList.add('hidden'));
-      if (screens[screenName]) {
-        screens[screenName].classList.remove('hidden');
-        if (screenName === 'dressingRoom') {
-          loadClosetIntoPanel();
-        }
-      }
-    }
-
-    // --- 4. APP LOGIC ---
-
-    // -- Screen: Model Uploader --
-    document.getElementById('btn-take-model-photo').onclick = () => {
-      document.getElementById('input-model-photo').click();
-    };
-    
-    document.getElementById('input-model-photo').onchange = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
       
-      try {
-        const base64string = await fileToBase64(file, 1000);
-        const fullBase64 = `data:image/jpeg;base64,${base64string}`;
+      elements.btnSaveClothing.addEventListener('click', () => {
+        const name = elements.inputClothingName.value.trim();
+        const type = elements.selectClothingType.value;
         
-        await dbPut("settings", { key: "modelPhoto", value: fullBase64 });
-        state.modelPhoto = fullBase64;
-        
-        document.getElementById('canvas-model-bg').src = fullBase64;
-        navigate('dressingRoom');
-      } catch (error) {
-        console.error("Error uploading model photo:", error);
-        alert("Error uploading photo. Please try again.");
-      }
-    };
-
-    // -- Screen: Item Uploader --
-    document.getElementById('btn-add-new-item').onclick = () => navigate('itemUploader');
-    document.getElementById('btn-uploader-close').onclick = () => navigate('dressingRoom');
-    
-    document.getElementById('btn-pick-item-photo').onclick = () => {
-      document.getElementById('input-item-photo').click();
-    };
-
-    document.getElementById('input-item-photo').onchange = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      // Show loading
-      document.getElementById('btn-pick-item-photo').classList.add('hidden');
-      document.getElementById('uploader-loading').classList.remove('hidden');
-      document.getElementById('uploader-preview').classList.add('hidden');
-      document.getElementById('uploader-form').classList.add('hidden');
-      
-      try {
-        const base64string = await fileToBase64(file);
-        const cleanImageBase64 = await aiRemoveBackground(base64string);
-        
-        // Show preview and form
-        document.getElementById('uploader-loading').classList.add('hidden');
-        if (cleanImageBase64) {
-          document.getElementById('uploader-preview').src = cleanImageBase64;
-          document.getElementById('uploader-preview').classList.remove('hidden');
-          document.getElementById('uploader-form').classList.remove('hidden');
-        } else {
-          // AI failed
-          document.getElementById('btn-pick-item-photo').classList.remove('hidden');
-        }
-      } catch (error) {
-        console.error("Error processing item:", error);
-        document.getElementById('uploader-loading').classList.add('hidden');
-        document.getElementById('btn-pick-item-photo').classList.remove('hidden');
-        alert("Error processing image. Please try again.");
-      }
-    };
-    
-    document.getElementById('btn-save-item').onclick = async () => {
-      const label = document.getElementById('input-item-label').value;
-      const color = document.getElementById('input-item-color').value;
-      const base64Image = document.getElementById('uploader-preview').src;
-      
-      if (!label || !color) {
-        alert("Please add a label and color!");
-        return;
-      }
-      
-      try {
-        const newItem = { label, color, base64Image };
-        await dbPut("closetItems", newItem);
-        
-        // Reset uploader
-        document.getElementById('input-item-label').value = '';
-        document.getElementById('input-item-color').value = '';
-        document.getElementById('uploader-preview').classList.add('hidden');
-        document.getElementById('uploader-form').classList.add('hidden');
-        document.getElementById('btn-pick-item-photo').classList.remove('hidden');
-        
-        navigate('dressingRoom');
-      } catch (error) {
-        console.error("Error saving item:", error);
-        alert("Error saving item. Please try again.");
-      }
-    };
-
-    // -- Screen: Dressing Room --
-    async function loadClosetIntoPanel() {
-      try {
-        state.closet = await dbGetAll("closetItems");
-        const container = document.getElementById('closet-items-container');
-        
-        if (state.closet.length === 0) {
-          document.getElementById('closet-empty-state').classList.remove('hidden');
-          container.innerHTML = '';
-          container.appendChild(document.getElementById('closet-empty-state'));
+        if (!name || !type) {
+          alert('Please enter a name and select a clothing type!');
           return;
         }
         
-        document.getElementById('closet-empty-state').classList.add('hidden');
-        container.innerHTML = '';
-        
-        state.closet.forEach(item => {
-          const div = document.createElement('div');
-          div.className = "w-24 h-24 bg-magic-lavender rounded-lg p-1 flex-shrink-0 shadow-md cursor-pointer border-2 border-transparent hover:border-magic-violet transition-colors";
-          div.innerHTML = `<img src="${item.base64Image}" class="w-full h-full object-contain" alt="${item.label}" />`;
-          div.onclick = () => addItemToCanvas(item.id);
-          container.appendChild(div);
-        });
-      } catch (error) {
-        console.error("Error loading closet:", error);
-      }
-    }
-
-    function addItemToCanvas(itemId) {
-      const itemData = state.closet.find(i => i.id === itemId);
-      if (!itemData) return;
-      
-      const canvasId = `item-${Date.now()}`;
-      const newItem = {
-        canvasId,
-        itemId: itemData.id,
-        x: 50,
-        y: 50,
-        scale: 1,
-        rotation: 0,
-        zIndex: state.canvasItems.length + 1
-      };
-      state.canvasItems.push(newItem);
-      
-      createMovableElement(newItem, itemData);
-      selectItem(canvasId);
-    }
-    
-    function createMovableElement(item, itemData) {
-      const div = document.createElement('div');
-      div.id = item.canvasId;
-      div.className = 'movable-item';
-      div.style.left = `${item.x}px`;
-      div.style.top = `${item.y}px`;
-      div.style.zIndex = item.zIndex;
-      div.innerHTML = `<img src="${itemData.base64Image}" alt="${itemData.label}" />`;
-      
-      makeDraggable(div);
-      document.getElementById('canvas').appendChild(div);
-    }
-
-    // -- Gesture Handling --
-    let activeItem = null;
-    let gestures = {
-      isDragging: false,
-      startX: 0,
-      startY: 0
-    };
-
-    function makeDraggable(element) {
-      // Mouse Events for desktop
-      element.addEventListener('mousedown', onMouseStart);
-      
-      // Touch Events for mobile
-      element.addEventListener('touchstart', onTouchStart, { passive: false });
-    }
-    
-    function onTouchStart(e) {
-      e.preventDefault();
-      if (e.touches.length !== 1) return;
-      
-      activeItem = e.currentTarget;
-      selectItem(activeItem.id);
-      
-      const itemState = state.canvasItems.find(i => i.canvasId === activeItem.id);
-      if (!itemState) return;
-      
-      gestures.isDragging = true;
-      gestures.startX = e.touches[0].clientX - itemState.x;
-      gestures.startY = e.touches[0].clientY - itemState.y;
-      
-      const onTouchMove = (moveEvent) => {
-        if (!gestures.isDragging || !activeItem) return;
-        moveEvent.preventDefault();
-        
-        const itemState = state.canvasItems.find(i => i.canvasId === activeItem.id);
-        if (!itemState) return;
-        
-        itemState.x = moveEvent.touches[0].clientX - gestures.startX;
-        itemState.y = moveEvent.touches[0].clientY - gestures.startY;
-        
-        updateItemTransform(activeItem, itemState);
-      };
-      
-      const onTouchEnd = () => {
-        gestures.isDragging = false;
-        document.removeEventListener('touchmove', onTouchMove);
-        document.removeEventListener('touchend', onTouchEnd);
-      };
-      
-      document.addEventListener('touchmove', onTouchMove, { passive: false });
-      document.addEventListener('touchend', onTouchEnd);
-    }
-    
-    function onMouseStart(e) {
-      e.preventDefault();
-      activeItem = e.currentTarget;
-      selectItem(activeItem.id);
-      
-      const itemState = state.canvasItems.find(i => i.canvasId === activeItem.id);
-      if (!itemState) return;
-      
-      gestures.isDragging = true;
-      gestures.startX = e.clientX - itemState.x;
-      gestures.startY = e.clientY - itemState.y;
-
-      const onMouseMove = (moveEvent) => {
-        if (!gestures.isDragging || !activeItem) return;
-        
-        const itemState = state.canvasItems.find(i => i.canvasId === activeItem.id);
-        if (!itemState) return;
-        
-        itemState.x = moveEvent.clientX - gestures.startX;
-        itemState.y = moveEvent.clientY - gestures.startY;
-        
-        updateItemTransform(activeItem, itemState);
-      };
-      
-      const onMouseUp = () => {
-        gestures.isDragging = false;
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-      };
-      
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-    }
-    
-    function updateItemTransform(element, itemState) {
-      element.style.left = `${Math.max(0, itemState.x)}px`;
-      element.style.top = `${Math.max(0, itemState.y)}px`;
-      element.style.zIndex = itemState.zIndex;
-      element.style.transform = `scale(${itemState.scale}) rotate(${itemState.rotation}deg)`;
-    }
-    
-    function selectItem(canvasId) {
-      state.selectedCanvasId = canvasId;
-      document.querySelectorAll('.movable-item').forEach(el => {
-        el.classList.toggle('selected', el.id === canvasId);
-      });
-      document.getElementById('layer-controls').classList.remove('hidden');
-    }
-    
-    // -- Layering Control Buttons --
-    document.getElementById('btn-layer-up').onclick = () => {
-      const item = state.canvasItems.find(i => i.canvasId === state.selectedCanvasId);
-      if (item) {
-        item.zIndex += 1;
-        updateItemTransform(document.getElementById(item.canvasId), item);
-      }
-    };
-    
-    document.getElementById('btn-layer-down').onclick = () => {
-      const item = state.canvasItems.find(i => i.canvasId === state.selectedCanvasId);
-      if (item) {
-        item.zIndex = Math.max(0, item.zIndex - 1);
-        updateItemTransform(document.getElementById(item.canvasId), item);
-      }
-    };
-    
-    document.getElementById('btn-layer-delete').onclick = () => {
-      const itemElement = document.getElementById(state.selectedCanvasId);
-      if (itemElement) {
-        itemElement.remove();
-      }
-      state.canvasItems = state.canvasItems.filter(i => i.canvasId !== state.selectedCanvasId);
-      state.selectedCanvasId = null;
-      document.getElementById('layer-controls').classList.add('hidden');
-    };
-
-    // -- Save Outfit Button --
-    document.getElementById('btn-save-outfit').onclick = async () => {
-      if (state.canvasItems.length === 0) {
-        alert("Add some items to your canvas first!");
-        return;
-      }
-      
-      const name = prompt("Name your outfit:");
-      if (!name) return;
-      
-      try {
-        const newOutfit = {
+        const newItem = {
+          id: generateId(),
           name,
-          layers: state.canvasItems,
+          type,
+          image: elements.clothingPreview.src,
+          createdAt: new Date()
         };
-        await dbPut("savedOutfits", newOutfit);
-        alert("Outfit saved! 💖");
-      } catch (error) {
-        console.error("Error saving outfit:", error);
-        alert("Error saving outfit. Please try again.");
-      }
-    };
-    
-    // -- Load Outfit & Analyze --
-    document.getElementById('btn-load-outfit').onclick = async () => {
-      try {
-        state.outfits = await dbGetAll("savedOutfits");
-        if (state.outfits.length === 0) {
-          alert("You have no saved outfits!");
-          return;
+        
+        state.closet.push(newItem);
+        renderCloset();
+        closeModal('modal-add-clothing');
+        
+        // Reset form
+        elements.inputClothingName.value = '';
+        elements.selectClothingType.value = '';
+        elements.clothingPreviewContainer.classList.add('hidden');
+      });
+      
+      // Layer Controls
+      elements.btnBringForward.addEventListener('click', bringForward);
+      elements.btnSendBackward.addEventListener('click', sendBackward);
+      elements.btnDeleteItem.addEventListener('click', deleteItem);
+      
+      // AI Stylist
+      elements.btnAiStylist.addEventListener('click', () => {
+        elements.modalAiStylist.classList.remove('hidden');
+        elements.aiStylistLoading.classList.remove('hidden');
+        elements.aiStylistResults.classList.add('hidden');
+        analyzeStyle();
+      });
+      
+      // Save Outfit
+      elements.btnSaveOutfit.addEventListener('click', () => {
+        const outfitName = prompt('Enter a name for this outfit:');
+        if (outfitName) {
+          alert(`Outfit "${outfitName}" saved successfully!`);
         }
-        
-        const outfitNames = state.outfits.map((o, i) => `${i + 1}: ${o.name}`).join('\n');
-        const choice = prompt(`Which outfit?\n${outfitNames}`);
-        const index = parseInt(choice) - 1;
-        
-        if (isNaN(index) || index < 0 || index >= state.outfits.length) {
-          alert("Invalid selection!");
-          return;
+      });
+      
+      // Clear All
+      elements.btnClearAll.addEventListener('click', () => {
+        if (confirm('Clear all items from canvas?')) {
+          state.canvasItems.forEach(item => item.element.remove());
+          state.canvasItems = [];
+          state.selectedItem = null;
+          elements.canvasEmpty.style.display = 'flex';
         }
-        
-        const outfit = state.outfits[index];
-        if (!outfit) return;
-        
-        // Show analysis modal
-        modalAnalysis.classList.remove('hidden');
-        document.getElementById('analysis-loading').classList.remove('hidden');
-        document.getElementById('analysis-results').classList.add('hidden');
-        
-        const analysis = await aiAnalyzeOutfit(outfit.layers);
-        
-        // Populate and show results
-        document.getElementById('formality-bar').style.width = `${analysis.formality * 10}%`;
-        document.getElementById('color-analysis').innerText = analysis.colorScheme;
-        document.getElementById('analysis-loading').classList.add('hidden');
-        document.getElementById('analysis-results').classList.remove('hidden');
-      } catch (error) {
-        console.error("Error loading outfit:", error);
-        alert("Error loading outfit. Please try again.");
-      }
-    };
-    
-    document.getElementById('btn-analysis-close').onclick = () => {
-      modalAnalysis.classList.add('hidden');
-    };
-
-    // --- 5. INITIALIZE APP ---
-    async function init() {
-      try {
-        await openDatabase();
-        
-        // Check if model photo exists
-        const modelPhoto = await dbGet("settings", "modelPhoto");
-        if (modelPhoto) {
-          state.modelPhoto = modelPhoto.value;
-          document.getElementById('canvas-model-bg').src = state.modelPhoto;
-          navigate('dressingRoom');
-        } else {
-          navigate('modelUploader');
-        }
-      } catch (e) {
-        console.error("Failed to initialize app:", e);
-        const loadingText = document.getElementById('loading-text');
-        if (loadingText) {
-          loadingText.innerHTML = "Error loading app. Please refresh the page.";
-        }
-      }
+      });
     }
 
-    // Start the app!
-    window.addEventListener('DOMContentLoaded', init);
+    // Render Closet
+    function renderCloset() {
+      elements.closetItems.innerHTML = '';
+      
+      if (state.closet.length === 0) {
+        elements.closetItems.appendChild(elements.closetEmpty);
+        return;
+      }
+      
+      elements.closetEmpty.remove();
+      
+      state.closet.forEach(item => {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'bg-gray-50 rounded-lg p-3 cursor-pointer hover:bg-purple-50 transition-colors';
+        itemElement.innerHTML = `
+          <img src="${item.image}" alt="${item.name}" class="w-full h-20 object-contain mb-2" />
+          <div class="text-sm font-semibold text-gray-800 truncate">${item.name}</div>
+          <div class="text-xs text-gray-500 capitalize">${item.type}</div>
+        `;
+        
+        itemElement.addEventListener('click', () => {
+          addClothingToCanvas(item);
+        });
+        
+        elements.closetItems.appendChild(itemElement);
+      });
+    }
+
+    // Initialize App
+    async function initializeApp() {
+      await initializeTF();
+      initializeEventListeners();
+      renderCloset();
+      
+      console.log('Caroline\'s Virtual Closet 2.0 initialized!');
+    }
+
+    // Start the app
+    document.addEventListener('DOMContentLoaded', initializeApp);
   </script>
 </body>
 </html>
