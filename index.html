@@ -40,6 +40,7 @@
             'magic-violet': '#8B72B1',
             'magic-purple': '#6D5B8D',
             'magic-dark': '#4A3A6A',
+            'text-dark': '#2D3748', /* Added dark gray for better readability */
           },
           fontFamily: {
             'sans': ['Nunito', 'sans-serif'],
@@ -97,22 +98,31 @@
       top: 0;
       left: 0;
     }
+
+    /* Improved text contrast */
+    .text-readable {
+      color: #2D3748 !important; /* Dark gray for best readability */
+    }
+    
+    .text-semidark {
+      color: #4A5568 !important; /* Medium dark for good contrast */
+    }
   </style>
 </head>
 
-<body class="bg-magic-bg text-magic-dark antialiased">
+<body class="bg-magic-bg text-readable antialiased">
   <div id="app-container" class="relative w-full h-full max-w-lg mx-auto shadow-2xl overflow-hidden bg-white">
     <!-- Loading Screen -->
     <div id="screen-loading" class="w-full h-full flex flex-col items-center justify-center p-8">
       <div class="font-title text-6xl text-magic-violet text-center">Caroline's Virtual Closet</div>
-      <div id="loading-text" class="text-magic-purple mt-4">Loading...</div>
+      <div id="loading-text" class="text-semidark mt-4">Loading...</div>
     </div>
 
     <!-- Model Uploader Screen -->
     <div id="screen-model-uploader" class="w-full h-full flex flex-col p-6 hidden">
       <div class="text-center mb-4">
-        <h1 class="font-title text-5xl text-magic-dark">Your Magic Mirror</h1>
-        <p class="text-magic-purple text-lg mt-2">
+        <h1 class="font-title text-5xl text-readable">Your Magic Mirror</h1>
+        <p class="text-semidark text-lg mt-2">
           First, let's add your model photo.
         </p>
       </div>
@@ -156,30 +166,30 @@
       </div>
       
       <!-- Layering Controls -->
-      <div id="layer-controls" class="hidden absolute top-4 right-4 z-50 flex flex-col bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg">
-        <button id="btn-layer-up" class="p-3 text-2xl">⬆️</button>
-        <button id="btn-layer-down" class="p-3 text-2xl border-t border-b border-magic-lavender">⬇️</button>
-        <button id="btn-layer-delete" class="p-3 text-2xl text-red-500">🗑️</button>
+      <div id="layer-controls" class="hidden absolute top-4 right-4 z-50 flex flex-col bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200">
+        <button id="btn-layer-up" class="p-3 text-2xl text-readable hover:bg-gray-100 rounded-t-2xl">⬆️</button>
+        <button id="btn-layer-down" class="p-3 text-2xl text-readable hover:bg-gray-100 border-t border-b border-gray-200">⬇️</button>
+        <button id="btn-layer-delete" class="p-3 text-2xl text-red-600 hover:bg-gray-100 rounded-b-2xl">🗑️</button>
       </div>
       
-      <p class="desktop-helper absolute top-4 left-4 z-50 bg-white/70 p-2 rounded-lg text-xs text-magic-dark shadow">
-        Tip: Click and drag to move items
+      <p class="desktop-helper absolute top-4 left-4 z-50 bg-white/90 p-3 rounded-lg text-sm text-readable shadow border border-gray-200">
+        💡 Tip: Click and drag to move items
       </p>
 
       <!-- Closet Panel -->
-      <div id="closet-panel" class="w-full h-48 bg-white rounded-t-3xl shadow-2xl p-4 flex flex-col">
+      <div id="closet-panel" class="w-full h-48 bg-white rounded-t-3xl shadow-2xl p-4 flex flex-col border-t border-gray-200">
         <div class="flex justify-between items-center mb-2">
-          <h2 class="font-title text-3xl text-magic-dark">My Closet</h2>
+          <h2 class="font-title text-3xl text-readable">My Closet</h2>
           <div class="space-x-2">
-            <button id="btn-save-outfit" class="text-2xl">💾</button>
-            <button id="btn-load-outfit" class="text-2xl">📖</button>
-            <button id="btn-add-new-item" class="text-2xl">🪄</button>
+            <button id="btn-save-outfit" class="text-2xl text-readable hover:text-magic-violet transition-colors" title="Save Outfit">💾</button>
+            <button id="btn-load-outfit" class="text-2xl text-readable hover:text-magic-violet transition-colors" title="Load Outfit">📖</button>
+            <button id="btn-add-new-item" class="text-2xl text-readable hover:text-magic-violet transition-colors" title="Add New Item">🪄</button>
           </div>
         </div>
-        <div id="closet-items-container" class="flex-1 flex space-x-3 overflow-x-auto p-2 bg-magic-bg rounded-lg">
+        <div id="closet-items-container" class="flex-1 flex space-x-3 overflow-x-auto p-2 bg-magic-bg rounded-lg border border-gray-200">
           <!-- Closet items will be added here -->
-          <div id="closet-empty-state" class="w-full flex flex-col items-center justify-center text-magic-purple">
-            <p class="text-sm">Your closet is empty!</p>
+          <div id="closet-empty-state" class="w-full flex flex-col items-center justify-center text-semidark">
+            <p class="text-sm font-semibold">Your closet is empty!</p>
             <p class="text-sm">Tap the 🪄 to add an item.</p>
           </div>
         </div>
@@ -189,39 +199,40 @@
     <!-- Item Uploader Screen -->
     <div id="screen-item-uploader" class="w-full h-full flex flex-col p-6 hidden">
       <div class="flex justify-between items-center mb-4">
-        <h1 class="font-title text-5xl text-magic-dark">Add Item</h1>
-        <button id="btn-uploader-close" class="text-2xl p-2">❌</button>
+        <h1 class="font-title text-5xl text-readable">Add Item</h1>
+        <button id="btn-uploader-close" class="text-2xl p-2 text-readable hover:text-red-500 transition-colors">❌</button>
       </div>
 
       <!-- Preview Area -->
-      <div class="flex-1 flex flex-col items-center justify-center bg-magic-lavender rounded-2xl p-4 overflow-hidden">
+      <div class="flex-1 flex flex-col items-center justify-center bg-magic-lavender rounded-2xl p-4 overflow-hidden border-2 border-dashed border-magic-violet">
         
         <!-- Step 1: Upload Button -->
-        <button id="btn-pick-item-photo" class="p-6 bg-white/50 rounded-2xl flex flex-col items-center">
+        <button id="btn-pick-item-photo" class="p-6 bg-white/80 rounded-2xl flex flex-col items-center border-2 border-dashed border-magic-violet hover:bg-white transition-colors">
           <span class="text-5xl">📷</span>
-          <span class="font-semibold text-magic-dark mt-2">Upload Clothing Photo</span>
+          <span class="font-semibold text-readable mt-2">Upload Clothing Photo</span>
+          <span class="text-sm text-semidark mt-1">Click to select an image</span>
         </button>
         
         <!-- Step 2: Loading Animation -->
-        <div id="uploader-loading" class="hidden flex-col items-center text-magic-dark">
+        <div id="uploader-loading" class="hidden flex-col items-center text-readable">
           <div class="w-24 h-24 border-4 border-dashed border-magic-violet rounded-full animate-spin"></div>
-          <span class="font-title text-3xl mt-4">Vibe-coding... ✨</span>
-          <span class="text-magic-purple">Processing image...</span>
+          <span class="font-title text-3xl mt-4 text-readable">Vibe-coding... ✨</span>
+          <span class="text-semidark">Processing image...</span>
         </div>
         
         <!-- Step 3: AI Result Preview -->
-        <img id="uploader-preview" src="" class="hidden w-full h-full object-contain" />
+        <img id="uploader-preview" src="" class="hidden w-full h-full object-contain bg-white rounded-lg" />
       </div>
 
       <!-- Labeling Form -->
       <div id="uploader-form" class="mt-6 space-y-3 hidden">
         <div>
-          <label class="font-semibold text-magic-purple ml-3">What is this?</label>
-          <input id="input-item-label" type="text" class="w-full p-4 rounded-full border border-magic-lavender" placeholder="e.g., 'Cozy Green Sweater'" />
+          <label class="font-semibold text-readable ml-3">What is this?</label>
+          <input id="input-item-label" type="text" class="w-full p-4 rounded-full border-2 border-magic-lavender focus:border-magic-violet focus:outline-none text-readable bg-white" placeholder="e.g., 'Cozy Green Sweater'" />
         </div>
         <div>
-          <label class="font-semibold text-magic-purple ml-3">What's the main color?</label>
-          <input id="input-item-color" type="text" class="w-full p-4 rounded-full border border-magic-lavender" placeholder="e.g., 'Green'" />
+          <label class="font-semibold text-readable ml-3">What's the main color?</label>
+          <input id="input-item-color" type="text" class="w-full p-4 rounded-full border-2 border-magic-lavender focus:border-magic-violet focus:outline-none text-readable bg-white" placeholder="e.g., 'Green'" />
         </div>
         <button id="btn-save-item" class="w-full text-lg bg-magic-violet text-white font-bold py-4 px-6 rounded-full shadow-lg hover:bg-magic-purple transition-all">
           Save to My Closet
@@ -234,31 +245,31 @@
     
     <!-- Outfit Analysis Modal -->
     <div id="modal-outfit-analysis" class="hidden absolute inset-0 z-50 bg-black/50 p-6 flex items-center justify-center">
-      <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 relative">
-        <button id="btn-analysis-close" class="absolute top-4 right-4 text-2xl">❌</button>
-        <h2 class="font-title text-4xl text-magic-dark text-center">Outfit Vibe</h2>
+      <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 relative border-2 border-magic-lavender">
+        <button id="btn-analysis-close" class="absolute top-4 right-4 text-2xl text-readable hover:text-red-500 transition-colors">❌</button>
+        <h2 class="font-title text-4xl text-readable text-center">Outfit Vibe</h2>
         
         <!-- Loading State -->
-        <div id="analysis-loading" class="my-8 flex flex-col items-center text-magic-dark">
+        <div id="analysis-loading" class="my-8 flex flex-col items-center text-readable">
           <div class="w-16 h-16 border-4 border-dashed border-magic-violet rounded-full animate-spin"></div>
-          <span class="font-title text-2xl mt-4">Analyzing... 🔮</span>
+          <span class="font-title text-2xl mt-4 text-readable">Analyzing... 🔮</span>
         </div>
         
         <!-- Results -->
         <div id="analysis-results" class="hidden space-y-4 mt-4">
           <div>
-            <h3 class="font-semibold text-magic-purple">Formality</h3>
+            <h3 class="font-semibold text-readable">Formality</h3>
             <div class="w-full bg-magic-lavender rounded-full h-6 mt-1 overflow-hidden">
               <div id="formality-bar" class="h-6 bg-gradient-to-r from-green-400 to-blue-800 rounded-full transition-all duration-500" style="width: 0%"></div>
             </div>
-            <div class="flex justify-between text-xs text-magic-purple">
+            <div class="flex justify-between text-sm text-semidark mt-1">
               <span>Casual</span>
               <span>Formal</span>
             </div>
           </div>
           <div>
-            <h3 class="font-semibold text-magic-purple">Color Match</h3>
-            <p id="color-analysis" class="text-lg text-magic-dark font-semibold"></p>
+            <h3 class="font-semibold text-readable">Color Match</h3>
+            <p id="color-analysis" class="text-lg text-readable font-semibold bg-magic-lavender p-3 rounded-lg"></p>
           </div>
         </div>
       </div>
@@ -516,8 +527,8 @@
         
         state.closet.forEach(item => {
           const div = document.createElement('div');
-          div.className = "w-24 h-24 bg-magic-lavender rounded-lg p-1 flex-shrink-0 shadow-md cursor-pointer";
-          div.innerHTML = `<img src="${item.base64Image}" class="w-full h-full object-contain" />`;
+          div.className = "w-24 h-24 bg-magic-lavender rounded-lg p-1 flex-shrink-0 shadow-md cursor-pointer border-2 border-transparent hover:border-magic-violet transition-colors";
+          div.innerHTML = `<img src="${item.base64Image}" class="w-full h-full object-contain" alt="${item.label}" />`;
           div.onclick = () => addItemToCanvas(item.id);
           container.appendChild(div);
         });
@@ -553,7 +564,7 @@
       div.style.left = `${item.x}px`;
       div.style.top = `${item.y}px`;
       div.style.zIndex = item.zIndex;
-      div.innerHTML = `<img src="${itemData.base64Image}" />`;
+      div.innerHTML = `<img src="${itemData.base64Image}" alt="${itemData.label}" />`;
       
       makeDraggable(div);
       document.getElementById('canvas').appendChild(div);
