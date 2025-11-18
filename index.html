@@ -17,7 +17,6 @@
   />
 
   <!-- 3. "Add to Home Screen" (PWA) Manifest -->
-  <!-- This is a base64 encoded JSON file to keep everything in one file -->
   <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIlRoZSBNYWdpY2FsIENsb3NldCIsCiAgInNob3J0X25hbWUiOiAiTWFnaWMgQ2xvc2V0IiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNGNUYzRjkiLAogICJ0aGVtZV9jb2xvciI6ICIjOEJBNzJCMTEiLAogICJkZXNjcmlwdGlvbiI6ICJBIGNvenkgYW5kIG1hZ2ljYWwgdmlydHVhbCBjbG9zZXQuIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9wbGFjZWhvbGQuY28vMTkyeDE5Mi84QjcyQjEvRjVGM0Y5P3RleHQ94p2kIiwKICAgICAgInNpemVzIjogIjE5MngxOTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9LAogICAgewogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzUxMng1TEIvOEI3MkIxL0Y1RjNGOT90ZXh0PeKdpCIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==">
   
   <!-- 4. Custom Theme Styles -->
@@ -25,7 +24,7 @@
     /* Apply custom fonts */
     body {
       font-family: "Nunito", sans-serif;
-      background-color: #f5f3f9; /* Soft Lavender-White */
+      background-color: #f5f3f9;
     }
     .font-title {
       font-family: "La Belle Aurore", cursive;
@@ -36,11 +35,11 @@
       theme: {
         extend: {
           colors: {
-            'magic-bg': '#F5F3F9',       /* Soft Lavender-White */
-            'magic-lavender': '#E4DDEF', /* Light Lavender */
-            'magic-violet': '#8B72B1',   /* Soft Violet */
-            'magic-purple': '#6D5B8D',   /* Muted Purple */
-            'magic-dark': '#4A3A6A',     /* Deep Purple */
+            'magic-bg': '#F5F3F9',
+            'magic-lavender': '#E4DDEF',
+            'magic-violet': '#8B72B1',
+            'magic-purple': '#6D5B8D',
+            'magic-dark': '#4A3A6A',
           },
           fontFamily: {
             'sans': ['Nunito', 'sans-serif'],
@@ -53,17 +52,18 @@
     /* Style for the "digital sticker" items */
     .movable-item {
       position: absolute;
-      width: 150px; /* Default size */
+      width: 150px;
       height: 150px;
       user-select: none;
       -webkit-user-select: none;
       touch-action: none;
+      cursor: move;
     }
     .movable-item img {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      pointer-events: none; /* Let touches pass through to the div */
+      pointer-events: none;
     }
     .movable-item.selected {
       outline: 3px dashed #8B72B1;
@@ -82,28 +82,34 @@
     html, body, #app-container {
       height: 100%;
       overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Ensure all screens fill the container */
+    #screen-loading,
+    #screen-model-uploader,
+    #screen-dressing-room,
+    #screen-item-uploader {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
     }
   </style>
 </head>
 
 <body class="bg-magic-bg text-magic-dark antialiased">
-  <div id="app-container" class="relative w-full h-full max-w-lg mx-auto shadow-2xl overflow-hidden">
-    <!-- 
-      This is a "single page app". We'll just show/hide screens.
-    -->
-
-    <!-- ====================================================== -->
-    <!-- Screen: Loading Screen                                 -->
-    <!-- ====================================================== -->
+  <div id="app-container" class="relative w-full h-full max-w-lg mx-auto shadow-2xl overflow-hidden bg-white">
+    <!-- Loading Screen -->
     <div id="screen-loading" class="w-full h-full flex flex-col items-center justify-center p-8">
-      <div class="font-title text-6xl text-magic-violet">Caroline's Virtual Closet</div>
+      <div class="font-title text-6xl text-magic-violet text-center">Caroline's Virtual Closet</div>
       <div id="loading-text" class="text-magic-purple mt-4">Loading...</div>
     </div>
 
-    <!-- ====================================================== -->
-    <!-- Screen: Model Uploader (Initial Setup)                 -->
-    <!-- ====================================================== -->
-    <div id="screen-model-uploader" class="w-full h-full flex-col p-6 hidden">
+    <!-- Model Uploader Screen -->
+    <div id="screen-model-uploader" class="w-full h-full flex flex-col p-6 hidden">
       <div class="text-center mb-4">
         <h1 class="font-title text-5xl text-magic-dark">Your Magic Mirror</h1>
         <p class="text-magic-purple text-lg mt-2">
@@ -112,7 +118,7 @@
       </div>
 
       <div class="relative flex-1 bg-magic-lavender rounded-2xl flex items-center justify-center overflow-hidden">
-        <!-- The Pose Guide -->
+        <!-- Pose Guide -->
         <svg
           class="absolute w-2/3 h-2/3 text-white opacity-60"
           viewBox="0 0 100 200"
@@ -125,8 +131,8 @@
           <path d="M 30 85 L 5 110" stroke-dasharray="4 4" />
           <path d="M 70 85 L 95 110" stroke-dasharray="4 4" />
         </svg>
-        <p class="absolute top-5 text-white font-semibold">✨ Stand in a well-lit spot ✨</p>
-        <p class="absolute bottom-5 text-white font-semibold text-center">
+        <p class="absolute top-5 text-white font-semibold text-center w-full px-4">✨ Stand in a well-lit spot ✨</p>
+        <p class="absolute bottom-5 text-white font-semibold text-center w-full px-4">
           Try an "A-pose" with arms slightly out!
         </p>
       </div>
@@ -135,17 +141,15 @@
         <button id="btn-take-model-photo" class="w-full text-lg bg-magic-violet text-white font-bold py-4 px-6 rounded-full shadow-lg hover:bg-magic-purple transition-all">
           Take Photo
         </button>
-        <input type="file" id="input-model-photo" class="hidden" accept="image/*" capture="user" />
+        <input type="file" id="input-model-photo" class="hidden" accept="image/*" />
       </div>
     </div>
 
-    <!-- ====================================================== -->
-    <!-- Screen: Main Dressing Room                             -->
-    <!-- ====================================================== -->
+    <!-- Main Dressing Room -->
     <div id="screen-dressing-room" class="w-full h-full flex flex-col hidden">
-      <!-- 1. The Canvas -->
+      <!-- The Canvas -->
       <div id="canvas" class="flex-1 relative bg-magic-lavender overflow-hidden">
-        <!-- Model Photo will be the background -->
+        <!-- Model Photo Background -->
         <img id="canvas-model-bg" src="" class="absolute w-full h-full object-contain object-center" />
         
         <!-- Movable items will be added here -->
@@ -157,11 +161,12 @@
         <button id="btn-layer-down" class="p-3 text-2xl border-t border-b border-magic-lavender">⬇️</button>
         <button id="btn-layer-delete" class="p-3 text-2xl text-red-500">🗑️</button>
       </div>
+      
       <p class="desktop-helper absolute top-4 left-4 z-50 bg-white/70 p-2 rounded-lg text-xs text-magic-dark shadow">
-        Tip: On desktop, hold Shift to rotate, Ctrl/Cmd to scale.
+        Tip: Click and drag to move items
       </p>
 
-      <!-- 2. The Closet Panel -->
+      <!-- Closet Panel -->
       <div id="closet-panel" class="w-full h-48 bg-white rounded-t-3xl shadow-2xl p-4 flex flex-col">
         <div class="flex justify-between items-center mb-2">
           <h2 class="font-title text-3xl text-magic-dark">My Closet</h2>
@@ -181,9 +186,7 @@
       </div>
     </div>
     
-    <!-- ====================================================== -->
-    <!-- Screen: Item Uploader                                  -->
-    <!-- ====================================================== -->
+    <!-- Item Uploader Screen -->
     <div id="screen-item-uploader" class="w-full h-full flex flex-col p-6 hidden">
       <div class="flex justify-between items-center mb-4">
         <h1 class="font-title text-5xl text-magic-dark">Add Item</h1>
@@ -203,7 +206,7 @@
         <div id="uploader-loading" class="hidden flex-col items-center text-magic-dark">
           <div class="w-24 h-24 border-4 border-dashed border-magic-violet rounded-full animate-spin"></div>
           <span class="font-title text-3xl mt-4">Vibe-coding... ✨</span>
-          <span class="text-magic-purple">Removing background...</span>
+          <span class="text-magic-purple">Processing image...</span>
         </div>
         
         <!-- Step 3: AI Result Preview -->
@@ -224,11 +227,12 @@
           Save to My Closet
         </button>
       </div>
+      
+      <!-- Hidden file input for item photos -->
+      <input type="file" id="input-item-photo" class="hidden" accept="image/*" />
     </div>
     
-    <!-- ====================================================== -->
-    <!-- Screen: Outfit Analysis (Modal)                        -->
-    <!-- ====================================================== -->
+    <!-- Outfit Analysis Modal -->
     <div id="modal-outfit-analysis" class="hidden absolute inset-0 z-50 bg-black/50 p-6 flex items-center justify-center">
       <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 relative">
         <button id="btn-analysis-close" class="absolute top-4 right-4 text-2xl">❌</button>
@@ -259,23 +263,15 @@
         </div>
       </div>
     </div>
+  </div>
 
-  </div> <!-- End #app-container -->
-
-  <!-- ====================================================== -->
-  <!-- JAVASCRIPT LOGIC                                         -->
-  <!-- ====================================================== -->
   <script type="module">
-    // --- API KEYS ---
-    // LEAVE THIS BLANK. The Canvas environment will provide the API key.
-    const API_KEY = "";
-    
     // --- GLOBAL STATE ---
     let state = {
       modelPhoto: null,
-      closet: [], // [{ id, label, color, base64Image }, ...]
-      outfits: [], // [{ id, name, layers: [...] }, ...]
-      canvasItems: [], // [{ canvasId, itemId, x, y, scale, rotation, zIndex }, ...]
+      closet: [],
+      outfits: [],
+      canvasItems: [],
       selectedCanvasId: null,
     };
 
@@ -289,7 +285,6 @@
     const modalAnalysis = document.getElementById('modal-outfit-analysis');
     
     // --- 1. DATABASE (IndexedDB) ---
-    // This is our free, in-browser storage
     let db;
     function openDatabase() {
       return new Promise((resolve, reject) => {
@@ -303,12 +298,15 @@
         
         request.onupgradeneeded = (e) => {
           let db = e.target.result;
-          // Key-value store for single items (like model photo)
-          db.createObjectStore("settings", { keyPath: "key" }); 
-          // Store for all closet items
-          db.createObjectStore("closetItems", { keyPath: "id", autoIncrement: true });
-          // Store for saved outfits
-          db.createObjectStore("savedOutfits", { keyPath: "id", autoIncrement: true });
+          if (!db.objectStoreNames.contains("settings")) {
+            db.createObjectStore("settings", { keyPath: "key" });
+          }
+          if (!db.objectStoreNames.contains("closetItems")) {
+            db.createObjectStore("closetItems", { keyPath: "id", autoIncrement: true });
+          }
+          if (!db.objectStoreNames.contains("savedOutfits")) {
+            db.createObjectStore("savedOutfits", { keyPath: "id", autoIncrement: true });
+          }
         };
       });
     }
@@ -343,95 +341,50 @@
       });
     }
 
-    // --- 2. AI SERVICE (Gemini API) ---
-
-    // This is our "Magic Wand" for background removal
+    // --- 2. AI SERVICE (Gemini API) - SIMULATED FOR NOW ---
     async function aiRemoveBackground(base64ImageData) {
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${API_KEY}`;
+      // For GitHub Pages demo, we'll simulate this since API keys can't be stored client-side
+      console.log("Simulating AI background removal...");
       
-      const payload = {
-        contents: [{
-          parts: [
-            { text: "Isolate the primary clothing item from this image. Redraw it photorealistically, preserving its *exact* texture, color, and detail, on a transparent background. Output a high-definition PNG." },
-            { inlineData: { mimeType: "image/jpeg", data: base64ImageData } }
-          ]
-        }],
-        generationConfig: {
-            responseModalities: ['IMAGE']
-        },
-      };
-
-      try {
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        if (!response.ok) {
-          throw new Error(`API Error: ${response.statusText}`);
-        }
-        const result = await response.json();
-        const base64Data = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
-        if (!base64Data) {
-          throw new Error("No image data returned from AI.");
-        }
-        return `data:image/png;base64,${base64Data}`;
-      } catch (error) {
-        console.error("AI Background Removal Error:", error);
-        alert("The AI Magic failed. Please try again.");
-        return null;
-      }
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // In a real implementation, you would call the Gemini API here
+      // For demo purposes, we'll just return the original image
+      return `data:image/jpeg;base64,${base64ImageData}`;
     }
 
-    // This is our "Fashionista" for outfit analysis
     async function aiAnalyzeOutfit(items) {
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+      // Simulate AI analysis for demo
+      console.log("Simulating outfit analysis...");
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      const labels = items.map(item => `${item.color} ${item.label}`);
-      const prompt = `
-        You are a fashion analyst. Analyze the following outfit: ${JSON.stringify(labels)}.
-        1.  Formality Score: Rate this on a 1-10 scale from 'Casual' (1) to 'Business Formal' (10).
-        2.  Color Match: Based on a color wheel, describe the color scheme (e.g., 'Analogous,' 'Complementary,' 'Monochromatic').
-        Respond *only* with a valid JSON object with keys "formality" (number) and "colorScheme" (string).
-      `;
-
-      const payload = {
-        contents: [{ parts: [{ text: prompt }] }],
+      // Return mock analysis
+      return {
+        formality: 7,
+        colorScheme: "Complementary colors with warm tones"
       };
-      
-      try {
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        if (!response.ok) throw new Error("API Error");
-        const result = await response.json();
-        const text = result.candidates[0].content.parts[0].text;
-        const json = JSON.parse(text.replace(/```json/g, '').replace(/```/g, '').trim());
-        return json; // { formality: 7, colorScheme: "Analogous" }
-      } catch (error) {
-        console.error("AI Analysis Error:", error);
-        return { formality: 0, colorScheme: "Error analyzing" };
-      }
     }
 
     // --- 3. UTILITIES ---
-    
-    // Read a file input and return a resized base64 string
     function fileToBase64(file, maxWidth = 800) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (e) => {
           const img = new Image();
           img.onload = () => {
+            // Only resize if image is larger than maxWidth
+            if (img.width <= maxWidth) {
+              resolve(e.target.result.split(',')[1]);
+              return;
+            }
+            
             const canvas = document.createElement('canvas');
             const scale = maxWidth / img.width;
             canvas.width = maxWidth;
             canvas.height = img.height * scale;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            // Return base64 string (JPEG for smaller size)
             resolve(canvas.toDataURL('image/jpeg', 0.8).split(',')[1]);
           };
           img.src = e.target.result;
@@ -441,13 +394,11 @@
       });
     }
 
-    // Simple navigation
     function navigate(screenName) {
       Object.values(screens).forEach(s => s.classList.add('hidden'));
       if (screens[screenName]) {
         screens[screenName].classList.remove('hidden');
         if (screenName === 'dressingRoom') {
-          // Special refresh for dressing room
           loadClosetIntoPanel();
         }
       }
@@ -464,16 +415,19 @@
       const file = e.target.files[0];
       if (!file) return;
       
-      const base64string = await fileToBase64(file, 1000); // Higher res for model
-      const fullBase64 = `data:image/jpeg;base64,${base64string}`;
-      
-      await dbPut("settings", { key: "modelPhoto", value: fullBase64 });
-      state.modelPhoto = fullBase64;
-      
-      // Update the canvas background
-      document.getElementById('canvas-model-bg').src = fullBase64;
-      
-      navigate('dressingRoom');
+      try {
+        const base64string = await fileToBase64(file, 1000);
+        const fullBase64 = `data:image/jpeg;base64,${base64string}`;
+        
+        await dbPut("settings", { key: "modelPhoto", value: fullBase64 });
+        state.modelPhoto = fullBase64;
+        
+        document.getElementById('canvas-model-bg').src = fullBase64;
+        navigate('dressingRoom');
+      } catch (error) {
+        console.error("Error uploading model photo:", error);
+        alert("Error uploading photo. Please try again.");
+      }
     };
 
     // -- Screen: Item Uploader --
@@ -494,18 +448,25 @@
       document.getElementById('uploader-preview').classList.add('hidden');
       document.getElementById('uploader-form').classList.add('hidden');
       
-      const base64string = await fileToBase64(file);
-      const cleanImageBase64 = await aiRemoveBackground(base64string);
-      
-      // Show preview and form
-      document.getElementById('uploader-loading').classList.add('hidden');
-      if (cleanImageBase64) {
-        document.getElementById('uploader-preview').src = cleanImageBase64;
-        document.getElementById('uploader-preview').classList.remove('hidden');
-        document.getElementById('uploader-form').classList.remove('hidden');
-      } else {
-        // AI failed
+      try {
+        const base64string = await fileToBase64(file);
+        const cleanImageBase64 = await aiRemoveBackground(base64string);
+        
+        // Show preview and form
+        document.getElementById('uploader-loading').classList.add('hidden');
+        if (cleanImageBase64) {
+          document.getElementById('uploader-preview').src = cleanImageBase64;
+          document.getElementById('uploader-preview').classList.remove('hidden');
+          document.getElementById('uploader-form').classList.remove('hidden');
+        } else {
+          // AI failed
+          document.getElementById('btn-pick-item-photo').classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error("Error processing item:", error);
+        document.getElementById('uploader-loading').classList.add('hidden');
         document.getElementById('btn-pick-item-photo').classList.remove('hidden');
+        alert("Error processing image. Please try again.");
       }
     };
     
@@ -519,46 +480,52 @@
         return;
       }
       
-      const newItem = { label, color, base64Image };
-      await dbPut("closetItems", newItem);
-      
-      // Reset uploader
-      document.getElementById('input-item-label').value = '';
-      document.getElementById('input-item-color').value = '';
-      document.getElementById('uploader-preview').classList.add('hidden');
-      document.getElementById('uploader-form').classList.add('hidden');
-      document.getElementById('btn-pick-item-photo').classList.remove('hidden');
-      
-      navigate('dressingRoom');
+      try {
+        const newItem = { label, color, base64Image };
+        await dbPut("closetItems", newItem);
+        
+        // Reset uploader
+        document.getElementById('input-item-label').value = '';
+        document.getElementById('input-item-color').value = '';
+        document.getElementById('uploader-preview').classList.add('hidden');
+        document.getElementById('uploader-form').classList.add('hidden');
+        document.getElementById('btn-pick-item-photo').classList.remove('hidden');
+        
+        navigate('dressingRoom');
+      } catch (error) {
+        console.error("Error saving item:", error);
+        alert("Error saving item. Please try again.");
+      }
     };
 
     // -- Screen: Dressing Room --
-    
-    // Refresh the scrolling closet panel
     async function loadClosetIntoPanel() {
-      state.closet = await dbGetAll("closetItems");
-      const container = document.getElementById('closet-items-container');
-      
-      if (state.closet.length === 0) {
-        document.getElementById('closet-empty-state').classList.remove('hidden');
+      try {
+        state.closet = await dbGetAll("closetItems");
+        const container = document.getElementById('closet-items-container');
+        
+        if (state.closet.length === 0) {
+          document.getElementById('closet-empty-state').classList.remove('hidden');
+          container.innerHTML = '';
+          container.appendChild(document.getElementById('closet-empty-state'));
+          return;
+        }
+        
+        document.getElementById('closet-empty-state').classList.add('hidden');
         container.innerHTML = '';
-        container.appendChild(document.getElementById('closet-empty-state'));
-        return;
+        
+        state.closet.forEach(item => {
+          const div = document.createElement('div');
+          div.className = "w-24 h-24 bg-magic-lavender rounded-lg p-1 flex-shrink-0 shadow-md cursor-pointer";
+          div.innerHTML = `<img src="${item.base64Image}" class="w-full h-full object-contain" />`;
+          div.onclick = () => addItemToCanvas(item.id);
+          container.appendChild(div);
+        });
+      } catch (error) {
+        console.error("Error loading closet:", error);
       }
-      
-      document.getElementById('closet-empty-state').classList.add('hidden');
-      container.innerHTML = '';
-      
-      state.closet.forEach(item => {
-        const div = document.createElement('div');
-        div.className = "w-24 h-24 bg-magic-lavender rounded-lg p-1 flex-shrink-0 shadow-md";
-        div.innerHTML = `<img src="${item.base64Image}" class="w-full h-full object-contain" />`;
-        div.onclick = () => addItemToCanvas(item.id);
-        container.appendChild(div);
-      });
     }
 
-    // Add an item from the closet to the canvas
     function addItemToCanvas(itemId) {
       const itemData = state.closet.find(i => i.id === itemId);
       if (!itemData) return;
@@ -567,7 +534,10 @@
       const newItem = {
         canvasId,
         itemId: itemData.id,
-        x: 50, y: 50, scale: 1, rotation: 0,
+        x: 50,
+        y: 50,
+        scale: 1,
+        rotation: 0,
         zIndex: state.canvasItems.length + 1
       };
       state.canvasItems.push(newItem);
@@ -576,7 +546,6 @@
       selectItem(canvasId);
     }
     
-    // Create the actual "digital sticker" element
     function createMovableElement(item, itemData) {
       const div = document.createElement('div');
       div.id = item.canvasId;
@@ -586,143 +555,100 @@
       div.style.zIndex = item.zIndex;
       div.innerHTML = `<img src="${itemData.base64Image}" />`;
       
-      // Add gesture controls
       makeDraggable(div);
-      
       document.getElementById('canvas').appendChild(div);
     }
 
-    // -- Gesture Handling (Drag, Pinch, Rotate) --
+    // -- Gesture Handling --
     let activeItem = null;
     let gestures = {
-      isDragging: false, isPinching: false, isRotating: false,
-      startX: 0, startY: 0,
-      startDist: 0, startAngle: 0,
-      shiftKey: false, ctrlKey: false
+      isDragging: false,
+      startX: 0,
+      startY: 0
     };
 
     function makeDraggable(element) {
-      // Touch Events
-      element.addEventListener('touchstart', onTouchStart);
-      
-      // Mouse Events (for desktop testing)
+      // Mouse Events for desktop
       element.addEventListener('mousedown', onMouseStart);
+      
+      // Touch Events for mobile
+      element.addEventListener('touchstart', onTouchStart, { passive: false });
     }
     
     function onTouchStart(e) {
       e.preventDefault();
+      if (e.touches.length !== 1) return;
+      
       activeItem = e.currentTarget;
       selectItem(activeItem.id);
       
       const itemState = state.canvasItems.find(i => i.canvasId === activeItem.id);
+      if (!itemState) return;
       
-      if (e.touches.length === 1) {
-        // Dragging
-        gestures.isDragging = true;
-        gestures.startX = e.touches[0].clientX - itemState.x;
-        gestures.startY = e.touches[0].clientY - itemState.y;
-      } else if (e.touches.length === 2) {
-        // Pinch & Rotate
-        gestures.isPinching = true;
-        gestures.isRotating = true;
-        gestures.startDist = getTouchDistance(e.touches);
-        gestures.startAngle = getTouchAngle(e.touches);
-      }
+      gestures.isDragging = true;
+      gestures.startX = e.touches[0].clientX - itemState.x;
+      gestures.startY = e.touches[0].clientY - itemState.y;
       
-      window.addEventListener('touchmove', onTouchMove, { passive: false });
-      window.addEventListener('touchend', onTouchEnd);
-    }
-    
-    function onTouchMove(e) {
-      e.preventDefault();
-      if (!activeItem) return;
-      
-      const itemState = state.canvasItems.find(i => i.canvasId === activeItem.id);
-      
-      if (e.touches.length === 1 && gestures.isDragging) {
-        itemState.x = e.touches[0].clientX - gestures.startX;
-        itemState.y = e.touches[0].clientY - gestures.startY;
-      } else if (e.touches.length === 2 && (gestures.isPinching || gestures.isRotating)) {
-        // Pinch
-        const newDist = getTouchDistance(e.touches);
-        itemState.scale = (newDist / gestures.startDist) * (itemState.scale || 1);
+      const onTouchMove = (moveEvent) => {
+        if (!gestures.isDragging || !activeItem) return;
+        moveEvent.preventDefault();
         
-        // Rotate
-        const newAngle = getTouchAngle(e.touches);
-        itemState.rotation = (newAngle - gestures.startAngle) * (180 / Math.PI) + (itemState.rotation || 0);
-      }
+        const itemState = state.canvasItems.find(i => i.canvasId === activeItem.id);
+        if (!itemState) return;
+        
+        itemState.x = moveEvent.touches[0].clientX - gestures.startX;
+        itemState.y = moveEvent.touches[0].clientY - gestures.startY;
+        
+        updateItemTransform(activeItem, itemState);
+      };
       
-      updateItemTransform(activeItem, itemState);
+      const onTouchEnd = () => {
+        gestures.isDragging = false;
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+      };
+      
+      document.addEventListener('touchmove', onTouchMove, { passive: false });
+      document.addEventListener('touchend', onTouchEnd);
     }
     
-    function onTouchEnd(e) {
-      gestures.isDragging = false;
-      gestures.isPinching = false;
-      gestures.isRotating = false;
-      window.removeEventListener('touchmove', onTouchMove);
-      window.removeEventListener('touchend', onTouchEnd);
-    }
-
-    // --- Mouse Handlers (for desktop) ---
     function onMouseStart(e) {
       e.preventDefault();
       activeItem = e.currentTarget;
       selectItem(activeItem.id);
       
       const itemState = state.canvasItems.find(i => i.canvasId === activeItem.id);
+      if (!itemState) return;
+      
       gestures.isDragging = true;
       gestures.startX = e.clientX - itemState.x;
       gestures.startY = e.clientY - itemState.y;
-      gestures.shiftKey = e.shiftKey; // Rotate
-      gestures.ctrlKey = e.ctrlKey || e.metaKey; // Scale
 
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
-    }
-
-    function onMouseMove(e) {
-      if (!activeItem || !gestures.isDragging) return;
+      const onMouseMove = (moveEvent) => {
+        if (!gestures.isDragging || !activeItem) return;
+        
+        const itemState = state.canvasItems.find(i => i.canvasId === activeItem.id);
+        if (!itemState) return;
+        
+        itemState.x = moveEvent.clientX - gestures.startX;
+        itemState.y = moveEvent.clientY - gestures.startY;
+        
+        updateItemTransform(activeItem, itemState);
+      };
       
-      const itemState = state.canvasItems.find(i => i.canvasId === activeItem.id);
-      const dx = e.clientX - (gestures.startX + itemState.x);
-      const dy = e.clientY - (gestures.startY + itemState.y);
-
-      if (gestures.shiftKey) { // Rotate
-        itemState.rotation += dx; // Simple rotation
-      } else if (gestures.ctrlKey) { // Scale
-        itemState.scale += dy * 0.01;
-      } else { // Drag
-        itemState.x = e.clientX - gestures.startX;
-        itemState.y = e.clientY - gestures.startY;
-      }
+      const onMouseUp = () => {
+        gestures.isDragging = false;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      };
       
-      updateItemTransform(activeItem, itemState);
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
     }
     
-    function onMouseUp(e) {
-      gestures.isDragging = false;
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
-    }
-    
-    // --- Gesture Helpers ---
-    function getTouchDistance(touches) {
-      const dx = touches[0].clientX - touches[1].clientX;
-      const dy = touches[0].clientY - touches[1].clientY;
-      return Math.sqrt(dx * dx + dy * dy);
-    }
-    
-    function getTouchAngle(touches) {
-      return Math.atan2(
-        touches[1].clientY - touches[0].clientY,
-        touches[1].clientX - touches[0].clientX
-      );
-    }
-    
-    // --- Update DOM ---
     function updateItemTransform(element, itemState) {
-      element.style.left = `${itemState.x}px`;
-      element.style.top = `${itemState.y}px`;
+      element.style.left = `${Math.max(0, itemState.x)}px`;
+      element.style.top = `${Math.max(0, itemState.y)}px`;
       element.style.zIndex = itemState.zIndex;
       element.style.transform = `scale(${itemState.scale}) rotate(${itemState.rotation}deg)`;
     }
@@ -738,96 +664,100 @@
     // -- Layering Control Buttons --
     document.getElementById('btn-layer-up').onclick = () => {
       const item = state.canvasItems.find(i => i.canvasId === state.selectedCanvasId);
-      if (item) item.zIndex += 1;
-      updateItemTransform(document.getElementById(item.canvasId), item);
+      if (item) {
+        item.zIndex += 1;
+        updateItemTransform(document.getElementById(item.canvasId), item);
+      }
     };
+    
     document.getElementById('btn-layer-down').onclick = () => {
       const item = state.canvasItems.find(i => i.canvasId === state.selectedCanvasId);
-      if (item) item.zIndex = Math.max(0, item.zIndex - 1);
-      updateItemTransform(document.getElementById(item.canvasId), item);
+      if (item) {
+        item.zIndex = Math.max(0, item.zIndex - 1);
+        updateItemTransform(document.getElementById(item.canvasId), item);
+      }
     };
+    
     document.getElementById('btn-layer-delete').onclick = () => {
+      const itemElement = document.getElementById(state.selectedCanvasId);
+      if (itemElement) {
+        itemElement.remove();
+      }
       state.canvasItems = state.canvasItems.filter(i => i.canvasId !== state.selectedCanvasId);
-      document.getElementById(state.selectedCanvasId).remove();
       state.selectedCanvasId = null;
       document.getElementById('layer-controls').classList.add('hidden');
     };
 
     // -- Save Outfit Button --
-    document.getElementById('btn-save-outfit').onclick = () => {
+    document.getElementById('btn-save-outfit').onclick = async () => {
+      if (state.canvasItems.length === 0) {
+        alert("Add some items to your canvas first!");
+        return;
+      }
+      
       const name = prompt("Name your outfit:");
       if (!name) return;
       
-      const newOutfit = {
-        name,
-        layers: state.canvasItems,
-      };
-      dbPut("savedOutfits", newOutfit);
-      alert("Outfit saved! 💖");
-      
-      // Clear canvas
-      state.canvasItems = [];
-      document.querySelectorAll('.movable-item').forEach(el => el.remove());
-      state.selectedCanvasId = null;
-      document.getElementById('layer-controls').classList.add('hidden');
+      try {
+        const newOutfit = {
+          name,
+          layers: state.canvasItems,
+        };
+        await dbPut("savedOutfits", newOutfit);
+        alert("Outfit saved! 💖");
+      } catch (error) {
+        console.error("Error saving outfit:", error);
+        alert("Error saving outfit. Please try again.");
+      }
     };
     
     // -- Load Outfit & Analyze --
     document.getElementById('btn-load-outfit').onclick = async () => {
-      state.outfits = await dbGetAll("savedOutfits");
-      if (state.outfits.length === 0) {
-        alert("You have no saved outfits!");
-        return;
+      try {
+        state.outfits = await dbGetAll("savedOutfits");
+        if (state.outfits.length === 0) {
+          alert("You have no saved outfits!");
+          return;
+        }
+        
+        const outfitNames = state.outfits.map((o, i) => `${i + 1}: ${o.name}`).join('\n');
+        const choice = prompt(`Which outfit?\n${outfitNames}`);
+        const index = parseInt(choice) - 1;
+        
+        if (isNaN(index) || index < 0 || index >= state.outfits.length) {
+          alert("Invalid selection!");
+          return;
+        }
+        
+        const outfit = state.outfits[index];
+        if (!outfit) return;
+        
+        // Show analysis modal
+        modalAnalysis.classList.remove('hidden');
+        document.getElementById('analysis-loading').classList.remove('hidden');
+        document.getElementById('analysis-results').classList.add('hidden');
+        
+        const analysis = await aiAnalyzeOutfit(outfit.layers);
+        
+        // Populate and show results
+        document.getElementById('formality-bar').style.width = `${analysis.formality * 10}%`;
+        document.getElementById('color-analysis').innerText = analysis.colorScheme;
+        document.getElementById('analysis-loading').classList.add('hidden');
+        document.getElementById('analysis-results').classList.remove('hidden');
+      } catch (error) {
+        console.error("Error loading outfit:", error);
+        alert("Error loading outfit. Please try again.");
       }
-      
-      const outfitNames = state.outfits.map((o, i) => `${i + 1}: ${o.name}`).join('\n');
-      const choice = prompt(`Which outfit?\n${outfitNames}`);
-      const outfit = state.outfits[parseInt(choice) - 1];
-      
-      if (!outfit) return;
-      
-      // Show analysis modal
-      modalAnalysis.classList.remove('hidden');
-      document.getElementById('analysis-loading').classList.remove('hidden');
-      document.getElementById('analysis-results').classList.add('hidden');
-      
-      // Get full item data for analysis
-      const itemsForAnalysis = outfit.layers.map(layer => {
-        return state.closet.find(ci => ci.id === layer.itemId);
-      }).filter(Boolean); // Filter out any items that may have been deleted
-
-      const analysis = await aiAnalyzeOutfit(itemsForAnalysis);
-      
-      // Populate and show results
-      document.getElementById('formality-bar').style.width = `${analysis.formality * 10}%`;
-      document.getElementById('color-analysis').innerText = analysis.colorScheme;
-      document.getElementById('analysis-loading').classList.add('hidden');
-      document.getElementById('analysis-results').classList.remove('hidden');
     };
     
     document.getElementById('btn-analysis-close').onclick = () => {
       modalAnalysis.classList.add('hidden');
     };
 
-
     // --- 5. INITIALIZE APP ---
     async function init() {
       try {
-        // --- FIX: Add a failsafe for blocked IndexedDB (e.g., Private Browsing) ---
-        let dbCheckTimeout = setTimeout(() => {
-            // If this runs, openDatabase() is stuck
-            const loadingText = document.getElementById('loading-text');
-            if (loadingText) {
-              loadingText.innerHTML = `
-                <p class="text-magic-purple mt-4 text-center">
-                    <b>Error: Could not load storage.</b> <br/><br/>
-                    Please make sure you are not in Private/Incognito mode and that browser data is enabled.
-                </p>`;
-            }
-        }, 5000); // 5-second timeout
-
         await openDatabase();
-        clearTimeout(dbCheckTimeout); // If openDatabase worked, clear the timeout
         
         // Check if model photo exists
         const modelPhoto = await dbGet("settings", "modelPhoto");
@@ -836,21 +766,19 @@
           document.getElementById('canvas-model-bg').src = state.modelPhoto;
           navigate('dressingRoom');
         } else {
-          // First time user
           navigate('modelUploader');
         }
       } catch (e) {
         console.error("Failed to initialize app:", e);
         const loadingText = document.getElementById('loading-text');
         if (loadingText) {
-          loadingText.innerHTML = "Error loading database. Please enable cookies and site data.";
+          loadingText.innerHTML = "Error loading app. Please refresh the page.";
         }
       }
     }
 
     // Start the app!
     window.addEventListener('DOMContentLoaded', init);
-
   </script>
 </body>
 </html>
