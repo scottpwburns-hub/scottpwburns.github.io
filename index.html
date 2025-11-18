@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>The Magical Closet</title>
+  <title>Caroline's Virtual Closet</title>
 
   <!-- 1. Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -96,8 +96,8 @@
     <!-- Screen: Loading Screen                                 -->
     <!-- ====================================================== -->
     <div id="screen-loading" class="w-full h-full flex flex-col items-center justify-center p-8">
-      <div class="font-title text-6xl text-magic-violet">The Magical Closet</div>
-      <div class="text-magic-purple mt-4">Loading...</div>
+      <div class="font-title text-6xl text-magic-violet">Caroline's Virtual Closet</div>
+      <div id="loading-text" class="text-magic-purple mt-4">Loading...</div>
     </div>
 
     <!-- ====================================================== -->
@@ -268,7 +268,7 @@
   <script type="module">
     // --- API KEYS ---
     // LEAVE THIS BLANK. The Canvas environment will provide the API key.
-    const API_KEY = "AIzaSyC2AFhoHSl-tpo-ZnYPZvGoXo-zW1TXZAA";
+    const API_KEY = "";
     
     // --- GLOBAL STATE ---
     let state = {
@@ -813,7 +813,21 @@
     // --- 5. INITIALIZE APP ---
     async function init() {
       try {
+        // --- FIX: Add a failsafe for blocked IndexedDB (e.g., Private Browsing) ---
+        let dbCheckTimeout = setTimeout(() => {
+            // If this runs, openDatabase() is stuck
+            const loadingText = document.getElementById('loading-text');
+            if (loadingText) {
+              loadingText.innerHTML = `
+                <p class="text-magic-purple mt-4 text-center">
+                    <b>Error: Could not load storage.</b> <br/><br/>
+                    Please make sure you are not in Private/Incognito mode and that browser data is enabled.
+                </p>`;
+            }
+        }, 5000); // 5-second timeout
+
         await openDatabase();
+        clearTimeout(dbCheckTimeout); // If openDatabase worked, clear the timeout
         
         // Check if model photo exists
         const modelPhoto = await dbGet("settings", "modelPhoto");
@@ -827,7 +841,10 @@
         }
       } catch (e) {
         console.error("Failed to initialize app:", e);
-        screens.loading.innerHTML = "Error loading database. Please enable cookies and site data.";
+        const loadingText = document.getElementById('loading-text');
+        if (loadingText) {
+          loadingText.innerHTML = "Error loading database. Please enable cookies and site data.";
+        }
       }
     }
 
